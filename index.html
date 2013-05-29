@@ -101,7 +101,7 @@ $(function(e) {
 });
 
 // Window load
-document.on('load', function(e) {
+window.on('load', function(e) {
 	var ltime = Date.now() - time;
 	console.log('window loaded ' + ltime + ' ms after domready ', e);
 	printSummary(e.summary());

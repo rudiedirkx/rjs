@@ -115,6 +115,15 @@
 				els.contains(el) || els.push(el);
 			});
 			return els;
+		},
+		each: function(callback, context) {
+			return $each(this, callback, context);
+		},
+		first: function() {
+			return this[0] || null;
+		},
+		last: function() {
+			return this[this.length-1] || null;
 		}
 	});
 
@@ -245,15 +254,6 @@
 				res.push( el[method].apply(el, args) );
 			});
 			return returnSelf ? this : res;
-		},
-		each: function(callback, context) {
-			return $each(this, callback, context);
-		},
-		first: function() {
-			return this[0] || null;
-		},
-		last: function() {
-			return this[this.length-1] || null;
 		}
 	});
 
@@ -345,26 +345,6 @@
 		}
 	};
 
-	Event.Replace = {
-		Window: {
-			mousewheel: function(callback) {
-				console.log('redirected "mousewheel" from Window to Document');
-				return D.on('mousewheel', callback);
-			},
-			ready: function(callback) {
-				console.log('redirected "ready" from Window to Document');
-				return D.on('ready', callback);
-			}
-		},
-		HTMLDocument: {
-			load: function(callback) {
-				console.log('redirected "load" from Document to Window');
-				return W.on('load', callback);
-			}
-		}
-	};
-	Event.Replace.Document = {load: Event.Replace.HTMLDocument.load};
-
 	$each([window, document, Element], function(Host) {
 		Host.extend = function(methods) {
 			$extend([this], methods);
@@ -384,11 +364,6 @@
 		},
 		on: function(eventType, matches, callback) {
 			callback || (callback = matches) && (matches = null);
-
-			var Host = $class(this);
-			if ( Event.Replace && Event.Replace[Host] && Event.Replace[Host][eventType] ) {
-				return Event.Replace[Host][eventType](callback, matches);
-			}
 
 			var baseType = eventType,
 				customEvent = false;
