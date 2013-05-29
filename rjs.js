@@ -1,7 +1,6 @@
 
 /**
  * Todo:
- * - domready via document/window with $() as shortcut (not main route)
  * - Custom event delegation/emission (return an Eventable)
  * - Asset loading (JS, CSS)
  * - Element.empty()?
@@ -10,7 +9,6 @@
  * - Serialize {} to query
  * - getPosition/Size/Scroll etc?
  * - Coordinates in AnyEvent?
- * - Remove event listeners? =)
  * - Poor slob without a name!
  */
 
@@ -126,6 +124,9 @@
 			return this[this.length-1] || null;
 		}
 	});
+	Array.defaultFilterCallback = function(item, i, list) {
+		return !!item;
+	};
 
 	$extend(String, {
 		trim: String.prototype.trim || function() {
@@ -362,6 +363,26 @@
 
 			return this.$$cache[name];
 		},
+		_addEventListener: function(eventType, callback) {
+			if ( this.addEventListener ) {
+				this.addEventListener(eventType, callback, false);
+			}
+			else if ( this.attachEvent ) {
+				this.attachEvent('on' + eventType, function(e) {
+					callback.call(this, e || event);
+				});
+			}
+			return this;
+		},
+		_removeEventListener: function(eventType, callback) {
+			if ( this.removeEventListener ) {
+				this.removeEventListener(eventType, callback, false);
+			}
+			else if ( this.detachEvent ) {
+				this.detachEvent('on' + eventType, callback);
+			}
+			return this;
+		},
 		on: function(eventType, matches, callback) {
 			callback || (callback = matches) && (matches = null);
 
@@ -371,10 +392,6 @@
 				customEvent = Event.Custom[eventType];
 				customEvent.type && (baseType = customEvent.type);
 			}
-
-			var events = this.$cache('events');
-			events[eventType] || (events[eventType] = []);
-			events[eventType].push(callback);
 
 			function onCallback(e) {
 				e && (e = new AnyEvent(e));
@@ -398,26 +415,43 @@
 				return callback.call(this, e);
 			}
 
-			if ( this.addEventListener ) {
-				this.addEventListener(baseType, onCallback, false);
-			}
-			else if ( this.attachEvent ) {
-				this.attachEvent('on' + baseType, function(e) {
-					onCallback.call(this, e || event);
-				});
+			if ( customEvent && customEvent.before ) {
+				if ( customEvent.before.call(this) === false ) {
+					return;
+				}
 			}
 
-			return this;
+			var events = this.$cache('events');
+			events[eventType] || (events[eventType] = []);
+			events[eventType].push({type: baseType, original: callback, callback: onCallback});
+
+			return this._addEventListener(baseType, onCallback);
 		},
 		fire: function(eventType, e) {
 			var events = this.$cache('events');
 			if ( events[eventType] ) {
 				e || (e = new AnyEvent(eventType));
 				e.subject = this;
-				$each(events[eventType], function(callback) {
-					callback.call(this, e);
+				$each(events[eventType], function(listener) {
+					listener.callback.call(this, e);
 				}, this);
 			}
+			return this;
+		},
+		off: function(eventType, callback) {
+			var events = this.$cache('events');
+			if ( events[eventType] ) {
+				var changed = false;
+				$each(events[eventType], function(listener, i) {
+					if ( !callback || callback == listener.original ) {
+						changed = true;
+						delete events[eventType][i];
+						this._removeEventListener(listener.type, listener.callback);
+					}
+				}, this);
+				changed && (events[eventType] = events[eventType].filter(Array.defaultFilterCallback));
+			}
+			return this;
 		}
 	};
 
@@ -613,6 +647,14 @@
 		}
 	});
 
+	Event.Custom.ready = {
+		before: function() {
+			if ( this == document ) {
+				domReadyAttached || attachDomReady();
+			}
+		}
+	};
+
 	function onDomReady() {
 		var rs = D.readyState;
 		if ( !domIsReady && (rs == 'complete' || rs == 'interactive') ) {
@@ -636,9 +678,9 @@
 		if ( typeof id == 'function' ) {
 			if ( domIsReady ) {
 				setTimeout(id, 1);
+				return D;
 			}
 
-			domReadyAttached || attachDomReady();
 			return D.on('ready', id);
 		}
 

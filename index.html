@@ -24,7 +24,6 @@ pre {
 <body>
 
 
-<div id=one>
 <ul id="ul">
 <li><a href="#1">Link 1</a></li>
 <!-- ASS! -->
@@ -35,8 +34,7 @@ pre {
 
 <p id="-some-p">Just a shibling.</p>
 
-<p><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="100" /></p>
-</div>
+<p><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="150" /></p>
 
 <form method="post" action>
 	<input type="hidden" value="hid it" />
@@ -93,7 +91,7 @@ Element.extend({
 
 // DOM ready
 var time = 0;
-$(function(e) {
+document.on('ready', function(e) {
 	time = Date.now();
 	console.log('domready! ', e);
 	printSummary(e.summary());
@@ -108,9 +106,10 @@ window.on('load', function(e) {
 });
 
 // Custom event: directchange
-$('lastname').on('directchange', function(e) {
+function onDirectChange(e) {
 	printSummary(this.value);
-});
+}
+$('lastname').on('directchange', onDirectChange);
 
 // DOM select0ring
 var ul = $('ul'),
@@ -162,16 +161,23 @@ setTimeout(function(p) {
 
 // XHR
 $(function() {
-	document.el('button', {"href": '/does/exist.not', "text": 'Do me XHR/Ajax!'}).inject($('one')).on('click', function(e) {
-		printSummary(e.summary());
-		e.stop();
-		this.xhr = $.get(this.attr('href')).on('success', function(e) {
-			alert('onSuccess?? ' + this.responseText.length + ' bytes');
+	// Nested domready calls check for internal domIsReady
+	$(function() {
+		function onAjaxButtonClick(e) {
 			printSummary(e.summary());
-		}).on('error', function(e) {
-			alert('onError: ' + this.url);
-			printSummary(e.summary());
-		});
+
+			this.xhr = $.get(this.attr('href')).on('success', function(e) {
+				alert('onSuccess?? ' + this.responseText.length + ' bytes');
+				printSummary(e.summary());
+			}).on('error', function(e) {
+				alert('onError: ' + this.url);
+				printSummary(e.summary());
+			});
+		}
+
+		document.el('button', {"href": '/does/exist.not', "text": 'Do me XHR/Ajax!'})
+			.injectBefore($$('form')[0])
+			.on('click', onAjaxButtonClick);
 	});
 });
 
