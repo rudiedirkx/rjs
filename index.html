@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+
+<head>
+<title>rjs?</title>
+<style>
+li.odd {
+	background: #eee;
+}
+li.even {
+	background: #ddd;
+}
+fieldset {
+	margin: 30px 0;
+}
+pre {
+	padding: 5px;
+	background: #eee;
+	border: solid 1px #ccc;
+}
+</style>
+</head>
+
+<body>
+
+
+<div id=one>
+<ul id="ul">
+<li><a href="#1">Link 1</a></li>
+<!-- ASS! -->
+<li><a href="#2" data-not-deletable>Link 2</a></li>
+<!-- FACE! -->
+<li><a href="#3">Link 3</a></li>
+</ul>
+
+<p id="-some-p">Just a shibling.</p>
+
+<p><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="100" /></p>
+</div>
+
+<form method="post" action>
+	<input type="hidden" value="hid it" />
+	<fieldset>
+		<legend>Name</legend>
+		<p>
+			<label for="firstname">First</label>
+			<input name="firstname" id="firstname" value="Jeff" />
+		</p>
+		<p>
+			<label for="lastname">Last</label>
+			<input name="lastname" id="lastname" autofocus />
+		</p>
+	</fieldset>
+	<fieldset>
+		<legend>Prefs</legend>
+		<p>
+			<label>Who?</label>
+			<label><input type="radio" name="who" value="Caroline" /> Caroline</label>
+			<label><input type="radio" name="who" value="Elizabeth" /> Elizabeth</label>
+			<label><input type="radio" name="who" value="Mary" /> Mary</label>
+		</p>
+		<p>
+			<label>What?</label>
+			<label><input type="checkbox" name="what[]" value="Pizza" /> Pizza</label>
+			<label><input type="checkbox" name="what[]" value="Jello" /> Jello</label>
+			<label><input type="checkbox" name="what[]" value="DVD" /> DVD</label>
+		</p>
+	</fieldset>
+	<p><input type="submit" name="submit" value="Submit that shit" /></p>
+</form>
+
+
+
+<script src="rjs.js"></script>
+<script>
+function printSummary(txt) {
+	body.appendChild(document.el('pre', {text: txt}));
+}
+
+// Prototyping Element
+Element.extend({
+	zebra: function() {
+		$each(this.getChildren(), function(el, i) {
+			console.log(i, el);
+			var c = i%2 == 0 ? 'odd' : 'even';
+			el.classList.remove('odd');
+			el.classList.remove('even');
+			el.classList.add(c);
+		});
+		return this;
+	}
+});
+
+// DOM ready
+var time = 0;
+$(function(e) {
+	time = Date.now();
+	console.log('domready! ', e);
+	printSummary(e.summary());
+	ul.zebra();
+});
+
+// Window load
+document.on('load', function(e) {
+	var ltime = Date.now() - time;
+	console.log('window loaded ' + ltime + ' ms after domready ', e);
+	printSummary(e.summary());
+});
+
+// Custom event: directchange
+$('lastname').on('directchange', function(e) {
+	printSummary(this.value);
+});
+
+// DOM select0ring
+var ul = $('ul'),
+	links = $$('ul a'),
+	p = $('#-some-p'),
+	ps = $$('#-some-p');
+console.log('one P ', p);
+console.log('all Ps ', ps);
+links.each(function(a) {
+	a.setText(a.getText() + ' (X)');
+});
+
+// Custom events: mouseenter & mouseleave
+$$('fieldset').on('mouseenter', function(e) {
+	console.log('fieldset mouseenter', e);
+}).on('mouseleave', function(e) {
+	console.log('fieldset mouseleave', e);
+});
+
+// Event delegation
+ul.on('click', 'a', function(e) {
+	e.stop();
+	console.log('clicked A in UL', this, e);
+	this.parentNode.remove();
+	ul.zebra();
+	printSummary(e.summary());
+});
+links.on('mouseover', function(e) {
+	console.log('mouseovered A', this, e);
+	printSummary(e.summary());
+}).attr('href', function(href) {
+	return href + 'xx';
+}).last().attr({"href": null, "title": 'I removed it! HA! No [href]!'});
+
+$$('form').on('mousedown', function(e) {
+	//printSummary(e.summary());
+}).on('keyup', function(e) {
+	//printSummary(e.summary());
+}).on('paste', function(e) {
+	//printSummary(e.summary());
+});
+
+// setTimeout with args
+setTimeout(function(p) {
+	var p2 = document.createElement('p');
+	p2.setHTML('*COPY* ' + p.getHTML() + ' *COPY*');
+	p2.injectAfter(p);
+}, 500, ps[0]);
+
+// XHR
+$(function() {
+	document.el('button', {"href": '/does/exist.not', "text": 'Do me XHR/Ajax!'}).inject($('one')).on('click', function(e) {
+		printSummary(e.summary());
+		e.stop();
+		this.xhr = $.get(this.attr('href')).on('success', function(e) {
+			alert('onSuccess?? ' + this.responseText.length + ' bytes');
+			printSummary(e.summary());
+		}).on('error', function(e) {
+			alert('onError: ' + this.url);
+			printSummary(e.summary());
+		});
+	});
+});
+
+</script>
+
+</body>
+
+</html>
