@@ -3,13 +3,10 @@
  * Todo:
  * - Custom event delegation/emission (return an Eventable)
  * - Asset loading (JS, CSS)
- * - Element.empty()?
- * - Element.css()
  * - Element.formValues()?
  * - Serialize {} to query
  * - getPosition/Size/Scroll etc?
  * - Coordinates in AnyEvent?
- * - Poor slob without a name!
  */
 
 (function(W, D) {
@@ -27,7 +24,8 @@
 	W.body = body;
 
 	var domReadyAttached = false,
-		domIsReady = false;
+		domIsReady = false,
+		cssDisplays = {};
 
 	function $ifsetor(pri, sec) {
 		return pri !== undefined ? pri : sec;
@@ -169,9 +167,7 @@
 			$extend(DOMTokenList, {
 				_reinit: function() {
 					// Empty
-					while ( this.length ) {
-						pop.call(this);
-					}
+					this.length = 0;
 
 					// Fill
 					var classes = this._el.className.trim();
@@ -321,15 +317,13 @@
 		mouseenter: {
 			type: 'mouseover',
 			filter: function(e) {
-				return e.fromElement != this &&
-					!this.contains(e.fromElement);
+				return e.fromElement != this && !this.contains(e.fromElement);
 			}
 		},
 		mouseleave: {
 			type: 'mouseout',
 			filter: function(e) {
-				return e.toElement != this &&
-					!this.contains(e.toElement);
+				return e.toElement != this && !this.contains(e.toElement);
 			}
 		},
 		mousewheel: {
@@ -345,6 +339,8 @@
 			}
 		}
 	};
+	'onmouseenter' in html && delete Event.Custom.mouseenter;
+	'onmouseleave' in html && delete Event.Custom.mouseleave;
 
 	$each([window, document, Element], function(Host) {
 		Host.extend = function(methods) {
@@ -613,11 +609,11 @@
 			this.classList.remove(token);
 			return this;
 		},
-		addClass: function(selector) {
+		addClass: function(token) {
 			this.classList.add(token);
 			return this;
 		},
-		toggleClass: function(selector) {
+		toggleClass: function(token) {
 			this.classList.toggle(token);
 			return this;
 		},
@@ -644,6 +640,52 @@
 		hover: function(matches, over, out) {
 			matches || (out = over) && (over = matches) && (matches = null);
 			return this.on('mouseenter', over).on('mouseleave', out);
+		},
+		getStyle: function(property) {
+			return this.currentStyle ? this.currentStyle[property] : getComputedStyle(this).getPropertyValue(property);
+		},
+		css: function(property, value) {
+			if ( value === undefined ) {
+				// Get single property
+				if ( typeof property == 'string' ) {
+					return this.getStyle(property);
+				}
+
+				// Set multiple properties
+				$each(property, function(value, name) {
+					this.style[name] = value;
+				}, this);
+				return this;
+			}
+
+			// Set single property
+			this.style[property] = value;
+			return this;
+		},
+		show: function() {
+			if ( !cssDisplays[this.nodeName] ) {
+				var el = document.el(this.nodeName).inject(this.ownerDocument.body);
+				cssDisplays[this.nodeName] = el.getStyle('display');
+				el.remove();
+			}
+			return this.css('display', cssDisplays[this.nodeName]);
+		},
+		hide: function() {
+			return this.css('display', 'none');
+		},
+		toggle: function() {
+			return this.getStyle('display') == 'none' ? this.show() : this.hide();
+		},
+		empty: function() {
+			try {
+				this.innerHTML = '';
+			}
+			catch (ex) {
+				while ( this.firstChild ) {
+					this.removeChild(this.firstChild);
+				}
+			}
+			return this;
 		}
 	});
 
