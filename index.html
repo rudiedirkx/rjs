@@ -19,6 +19,7 @@ pre {
 	border: solid 1px #ccc;
 }
 </style>
+<script src="rjs.js"></script>
 </head>
 
 <body>
@@ -69,11 +70,10 @@ pre {
 
 
 
-<script src="rjs.js"></script>
 <script>
 
 function printSummary(txt) {
-	body.appendChild(document.el('pre', {text: txt}));
+	document.body.appendChild(document.el('pre', {text: txt}));
 }
 
 // Prototyping Element
@@ -194,9 +194,9 @@ function doSomethingAsync() {
 	return eventable;
 }
 doSomethingAsync().on('yes', function() {
-	console.log('[Eventable] YESSSSSS', 'in ' + (Date.now() - this.time)/1000 + ' s');
+	alert('[Eventable] YESSSSSS in ' + (Date.now() - this.time)/1000 + ' s');
 }).on('no', function() {
-	console.log('[Eventable] Nooo =(', 'in ' + (Date.now() - this.time)/1000 + ' s');
+	alert('[Eventable] Nooo =( in ' + (Date.now() - this.time)/1000 + ' s');
 });
 
 

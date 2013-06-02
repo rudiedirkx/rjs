@@ -16,11 +16,9 @@
 
 	// Some hideous, very useful globals
 	var html = D.documentElement,
-		head = html.getElementsByTagName('head')[0],
-		body = D.body; // Assume this script runs inside <body>
+		head = html.getElementsByTagName('head')[0];
 	W.html = html;
 	W.head = head;
-	W.body = body;
 
 	var domReadyAttached = false,
 		domIsReady = false,
