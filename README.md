@@ -96,7 +96,7 @@ Add global Ajax handlers
 
 Ajax with 'done' callback (always, no matter the response code):
 
-	$.get('/some/url', function(rsp) {
+	$.get('/some/url').on('done', function(rsp) {
 		alert(rsp);
 	});
 
@@ -111,8 +111,14 @@ Ajax with specific callbacks:
 Ajax some FormData to the server and query upload progress:
 
 	fd = new FormData($('some-form'));
-	$.post('/some/url', null, fd).on('progress', function(e) {
+	$.post('/some/url', fd).on('progress', function(e) {
 		console.log('some progress...', e);
 	}).on('done', function(e) {
 		console.log('done!', e);
+	});
+
+Ajax delete something:
+
+	$.xhr('/movie/14/comments', {method: 'delete'}).on('success', function(e) {
+		console.log('deleted something!', e);
 	});

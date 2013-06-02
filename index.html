@@ -181,7 +181,7 @@ $(function() {
 		function onAjaxButtonClick(e) {
 			printSummary(e.summary());
 
-			window.xhr = this.xhr = $.get(this.attr('href')).on('success', function(e) {
+			window.xhr = this.xhr = $.post(this.attr('href'), 'oele=boele').on('success', function(e) {
 				alert('onSuccess?? ' + this.responseText.length + ' bytes');
 				printSummary(e.summary());
 			}).on('error', function(e) {

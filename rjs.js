@@ -806,10 +806,11 @@
 	function XHR(url, options) {
 		options || (options = {});
 		var xhr = new XMLHttpRequest,
-			method = (options.method || 'GET').toUpperCase(),
+			method = $ifsetor(options.method, 'GET').toUpperCase(),
 			async = $ifsetor(options.async, true),
-			send = $ifsetor(options.send, true);
-		xhr.open(method, url, async);
+			send = $ifsetor(options.send, true),
+			data = options.data || '';
+		xhr.open(method, url, async, options.username, options.password);
 		xhr.url = url;
 		xhr.method = method;
 		xhr.on('readystatechange', function(e) {
@@ -824,22 +825,26 @@
 				this.globalFire('xhr', 'done', e);
 			}
 		});
+		if ( method == 'POST' ) {
+			if ( !data.constructor || data.constructor != window.FormData ) {
+				var encoding = options.encoding ? '; charset=' + encoding : '';
+				xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded' + encoding);
+			}
+		}
 		if ( send ) {
 			xhr.globalFire('xhr', 'start');
 			xhr.fire('start');
-			xhr.send(options.data || '');
+			xhr.send(data);
 		}
 		return xhr;
 	}
-	XHR.defaultEventType = 'done';
 
 	function shortXHR(method) {
-		return function(url, callback, data, options) {
+		return function(url, data, options) {
 			options || (options = {});
 			options.method = method;
 			options.data = data;
 			var xhr = XHR(url, options);
-			callback && xhr.on(XHR.defaultEventType, callback);
 			return xhr;
 		};
 	}
@@ -857,7 +862,7 @@
 	W.Eventable = Eventable;
 	W.Coords2D = Coords2D;
 
-	W.XHR = XHR;
+	W.$.xhr = XHR;
 	W.$.get = shortXHR('get');
 	W.$.post = shortXHR('post');
 
