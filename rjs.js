@@ -305,6 +305,9 @@
 
 		this.data = e.clipboardData;
 		this.time = e.timeStamp || e.timestamp || e.time || Date.now();
+
+		this.total = e.total || e.totalSize;
+		this.loaded = e.loaded || e.position;
 	}
 	$extend(AnyEvent, {
 		summary: function() {
@@ -369,7 +372,7 @@
 	'onmouseenter' in html && delete Event.Custom.mouseenter;
 	'onmouseleave' in html && delete Event.Custom.mouseleave;
 
-	$each([window, document, Element], function(Host) {
+	$each([window, document, Element, Elements], function(Host) {
 		Host.extend = function(methods) {
 			$extend([this], methods);
 		};
@@ -421,7 +424,7 @@
 			}
 
 			function onCallback(e) {
-				e && (e = new AnyEvent(e));
+				e && !(e instanceof AnyEvent) && (e = new AnyEvent(e));
 
 				// Find event subject
 				var subject = this;
@@ -438,7 +441,7 @@
 					}
 				}
 
-				e.setSubject(subject);
+				e.subject || e.setSubject(subject);
 				return callback.call(subject, e);
 			}
 
@@ -458,7 +461,6 @@
 			var events = this.$cache('events');
 			if ( events[eventType] ) {
 				e || (e = new AnyEvent(eventType));
-				e.setSubject(this);
 				$each(events[eventType], function(listener) {
 					listener.callback.call(this, e);
 				}, this);
@@ -479,10 +481,20 @@
 				changed && (events[eventType] = events[eventType].filter(Array.defaultFilterCallback));
 			}
 			return this;
+		},
+		globalFire: function(globalType, localType, originalEvent) {
+			var e = originalEvent ? originalEvent : new AnyEvent(localType),
+				eventType = (globalType + '-' + localType).camel();
+			e.target = e.subject = this;
+			e.type = localType;
+			e.globalType = globalType;
+			W.fire(eventType, e);
+			return this;
 		}
 	});
 
 	$extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
+	W.XMLHttpRequestUpload && $extend([XMLHttpRequestUpload], Eventable.prototype);
 
 	$extend([Element, Text], {
 		firstAncestor: function(selector) {
@@ -576,8 +588,8 @@
 			if ( value === undefined ) {
 				// Get single attribute
 				if ( typeof name == 'string' ) {
-					if ( Element.attr2method[name] ) {
-						return Element.attr2method[name].call(this, value, prefix);
+					if ( Element.attr2method[prefix + name] ) {
+						return Element.attr2method[prefix + name].call(this, value, prefix);
 					}
 					return this.getAttribute(prefix + name);
 				}
@@ -589,8 +601,8 @@
 						self.removeAttribute(prefix + name);
 					}
 					else {
-						if ( Element.attr2method[name] ) {
-							return Element.attr2method[name].call(self, value, prefix);
+						if ( Element.attr2method[prefix + name] ) {
+							return Element.attr2method[prefix + name].call(self, value, prefix);
 						}
 						self.setAttribute(prefix + name, value);
 					}
@@ -605,8 +617,8 @@
 				if ( typeof value == 'function' ) {
 					value = value.call(this, this.getAttribute(prefix + name));
 				}
-				if ( Element.attr2method[name] ) {
-					return Element.attr2method[name].call(this, value, prefix);
+				if ( Element.attr2method[prefix + name] ) {
+					return Element.attr2method[prefix + name].call(this, value, prefix);
 				}
 				this.setAttribute(prefix + name, value);
 			}
@@ -803,18 +815,18 @@
 		xhr.on('readystatechange', function(e) {
 			if ( this.readyState == 4 ) {
 				var success = this.status == 200,
-					eventType = success ? 'success' : 'error',
-					// There should be a wrapper/helper for this:
-					globalEventType = ('xhr-' + eventType).camel();
+					eventType = success ? 'success' : 'error';
 				// Specific events
 				this.fire(eventType, e);
 				this.fire('done', e);
 				// Global events
-				W.fire(globalEventType, e);
-				W.fire('xhrDone', e);
+				this.globalFire('xhr', eventType, e);
+				this.globalFire('xhr', 'done', e);
 			}
 		});
 		if ( send ) {
+			xhr.globalFire('xhr', 'start');
+			xhr.fire('start');
 			xhr.send(options.data || '');
 		}
 		return xhr;
