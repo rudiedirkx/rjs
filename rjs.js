@@ -4,8 +4,6 @@
  * - Asset loading (JS, CSS)
  * - Element.formValues()?
  * - Serialize {} to query
- * - getPosition/Size/Scroll etc?
- * - Coordinates in AnyEvent: e.coords: page, relative, subject, target
  */
 
 (function(W, D) {
@@ -845,6 +843,7 @@
 	W.Elements = Elements;
 	W.AnyEvent = AnyEvent;
 	W.Eventable = Eventable;
+	W.Coords2D = Coords2D;
 
 	W.XHR = XHR;
 	W.$.get = shortXHR('get');
