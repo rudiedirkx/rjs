@@ -690,6 +690,11 @@
 		}
 	});
 
+	$extend(document, {
+		getElement: Element.prototype.getElement,
+		getElements: Element.prototype.getElements
+	});
+
 	Event.Custom.ready = {
 		before: function() {
 			if ( this == document ) {
@@ -717,7 +722,7 @@
 		}
 	}
 
-	function $(id) {
+	function $(id, selector) {
 		if ( typeof id == 'function' ) {
 			if ( domIsReady ) {
 				setTimeout(id, 1);
@@ -728,16 +733,16 @@
 		}
 
 		// By [id]
-		if ( id.match(/^[\w\-]+$/) ) {
+		if ( !selector ) {
 			return D.getElementById(id);
 		}
 
 		// By selector
-		return D.querySelector(id);
+		return D.getElement(id);
 	}
 
 	function $$(selector) {
-		return new Elements($arrayish(selector) ? selector : D.querySelectorAll(selector));
+		return $arrayish(selector) ? new Elements(selector) : D.getElements(selector);
 	}
 
 	function XHR(url, options) {
