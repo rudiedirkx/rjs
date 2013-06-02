@@ -39,14 +39,14 @@ pre {
 </p>
 
 <ul id="ul">
-<li><a href="#1"><span>Link 1</span></a></li>
-<!-- ASS! -->
-<li><a href="#2" data-not-deletable><span>Link 2</span></a></li>
-<!-- FACE! -->
-<li><a href="#3"><span>Link 3</span></a></li>
+	<li><a href="#1"><span>Link 1</span></a></li>
+	<!-- ASS! -->
+	<li><a href="#2" data-not-deletable><span>Link 2</span></a></li>
+	<!-- FACE! -->
+	<li><a href="#3"><span>Link 3</span></a></li>
 </ul>
 
-<p id="-some-p">Just a shibling (should copy to down here).</p>
+<p id="-some-p">Just a shibling.</p>
 
 <p class="img"><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="150" /></p>
 
@@ -167,13 +167,6 @@ $$('form').on('mousedown', function(e) {
 	//printSummary(e.summary());
 });
 
-// setTimeout with args
-setTimeout(function(p) {
-	var p2 = document.createElement('p');
-	p2.setHTML('*COPY* ' + p.getHTML() + ' *COPY*');
-	p2.injectAfter(p);
-}, 500, ps[0]);
-
 // XHR
 $(function() {
 	// Nested domready calls check for internal domIsReady
@@ -258,6 +251,15 @@ $$('[title]').on('mouseenter', function(e) {
 	return this.attr('title');
 }).attr('title', null);
 
+// Timeout to ensure visually all script ran
+setTimeout(function() {
+	document.el('p', {text: 'It seems to work...'}).css({
+		"font-weight": 'bold',
+		background: 'black',
+		color: 'white',
+		padding: '10px'
+	}).injectBefore($('form', 1));
+}, 500);
 
 </script>
 

@@ -89,14 +89,6 @@
 	}
 
 	$extend(Array, {
-		indexOf: Array.prototype.indexOf || function(obj) {
-			for ( var i=0, L=this.length; i<L; i++ ) {
-				if ( this[i] === obj ) {
-					return i;
-				}
-			}
-			return -1;
-		},
 		contains: function(obj) {
 			return this.indexOf(obj) != -1;
 		},
@@ -122,9 +114,6 @@
 	};
 
 	$extend(String, {
-		trim: String.prototype.trim || function() {
-			return this.replace(/^\s+/, '').replace(/\s+$/, '');
-		},
 		camel: function() {
 			// foo-bar => fooBar, -ms-foo => MsFoo
 			return this.replace(/\-([^\-])/g, function(a, m) {
@@ -218,19 +207,6 @@
 			this.add(after);
 		}
 	});
-
-	// setTimeout polyfill //
-	// This doesn't belong here...
-	// if ( !Function.prototype.bind ) {
-	W.originalSetTimeout = W.setTimeout; // exposed
-	W.setTimeout = function(cb, delay) {
-		var args = slice.call(arguments, 2);
-		return W.originalSetTimeout(function() {
-			cb.apply(null, args);
-		}, delay);
-	};
-	// }
-	// setTimeout polyfill //
 
 	function Elements(source) {
 		var self = this;
@@ -395,21 +371,13 @@
 		},
 		_addEventListener: function(eventType, callback) {
 			if ( this.addEventListener ) {
-				this.addEventListener(eventType, callback, false);
-			}
-			else if ( this.attachEvent ) {
-				this.attachEvent('on' + eventType, function(e) {
-					callback.call(this, e || event);
-				});
+				this.addEventListener(eventType, callback);
 			}
 			return this;
 		},
 		_removeEventListener: function(eventType, callback) {
 			if ( this.removeEventListener ) {
-				this.removeEventListener(eventType, callback, false);
-			}
-			else if ( this.detachEvent ) {
-				this.detachEvent('on' + eventType, callback);
+				this.removeEventListener(eventType, callback);
 			}
 			return this;
 		},
@@ -685,7 +653,7 @@
 			return this.on('mouseenter', over).on('mouseleave', out);
 		},
 		getStyle: function(property) {
-			return this.currentStyle ? this.currentStyle[property] : getComputedStyle(this).getPropertyValue(property);
+			return getComputedStyle(this).getPropertyValue(property);
 		},
 		css: function(property, value) {
 			if ( value === undefined ) {
