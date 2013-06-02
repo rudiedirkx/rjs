@@ -182,6 +182,24 @@ $(function() {
 	});
 });
 
+// Eventable (async custom events)
+function doSomethingAsync() {
+	// Do XHR here, or WebWorker or dataURL etc
+	var subject = {ass: 'face'};
+	var eventable = new Eventable(subject);
+	setTimeout(function() {
+		var eventType = Math.random() > 0.5 ? 'yes' : 'no';
+		eventable.fire(eventType);
+	}, Math.random() * 3000);
+	return eventable;
+}
+doSomethingAsync().on('yes', function() {
+	console.log('[Eventable] YESSSSSS', 'in ' + (Date.now() - this.time)/1000 + ' s');
+}).on('no', function() {
+	console.log('[Eventable] Nooo =(', 'in ' + (Date.now() - this.time)/1000 + ' s');
+});
+
+
 </script>
 
 </body>

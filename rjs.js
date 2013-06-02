@@ -1,12 +1,11 @@
 
 /**
  * Todo:
- * - Custom event delegation/emission (return an Eventable)
  * - Asset loading (JS, CSS)
  * - Element.formValues()?
  * - Serialize {} to query
  * - getPosition/Size/Scroll etc?
- * - Coordinates in AnyEvent?
+ * - Coordinates in AnyEvent: e.coords: page, relative, subject, target
  */
 
 (function(W, D) {
@@ -348,7 +347,11 @@
 		};
 	});
 
-	var Eventable = {
+	function Eventable(subject) {
+		this.subject = subject;
+		this.time = Date.now();
+	}
+	$extend(Eventable, {
 		"$cache": function(name, value, defaultValue) {
 			this.$$cache || (this.$$cache = {});
 			this.$$cache[name] || (this.$$cache[name] = defaultValue || {});
@@ -449,9 +452,9 @@
 			}
 			return this;
 		}
-	};
+	});
 
-	$extend([W, D, Element, XMLHttpRequest], Eventable);
+	$extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
 
 	$extend([Element, Text], {
 		firstAncestor: function(selector) {
