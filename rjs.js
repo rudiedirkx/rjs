@@ -251,6 +251,25 @@
 		}
 	});
 
+	function Coords2D(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+	$extend(Coords2D, {
+		add: function(coords) {
+			return new Coords2D(this.x + coords.x, this.y + coords.y);
+		},
+		subtract: function(coords) {
+			return new Coords2D(this.x - coords.x, this.y - coords.y);
+		},
+		toCSS: function() {
+			return {
+				left: this.x + 'px',
+				top: this.y + 'px'
+			};
+		}
+	});
+
 	function AnyEvent(e) {
 		if ( typeof e == 'string' ) {
 			this.originalEvent = null;
@@ -279,6 +298,13 @@
 		this.which = this.key || this.button;
 		this.detail = e.detail;
 
+		if ( e.pageX != null && e.pageY != null ) {
+			this.pageXY = new Coords2D(e.pageX, e.pageY);
+		}
+		else if ( e.clientX != null && e.clientY != null ) {
+			this.pageXY = new Coords2D(e.clientX, e.clientY).add(W.getScroll());
+		}
+
 		this.data = e.clipboardData;
 		this.time = e.timeStamp || e.timestamp || e.time || Date.now();
 	}
@@ -298,13 +324,19 @@
 			e.preventDefault && e.preventDefault();
 			e.returnValue = false;
 		},
-		stop: function() {
-			return this.preventDefault();
-		},
 		stopPropagation: function() {
 			var e = this.originalEvent;
 			e.stopPropagation && e.stopPropagation();
-			e.cancelBubble = false;
+			e.cancelBubble = true;
+		},
+		setSubject: function(subject) {
+			this.subject = subject;
+			if ( this.pageXY ) {
+				this.subjectXY = this.pageXY;
+				if ( this.subject.getPosition ) {
+					this.subjectXY = this.subjectXY.subtract(this.subject.getPosition());
+				}
+			}
 		}
 	});
 
@@ -408,8 +440,8 @@
 					}
 				}
 
-				e.subject = subject;
-				return callback.call(this, e);
+				e.setSubject(subject);
+				return callback.call(subject, e);
 			}
 
 			if ( customEvent && customEvent.before ) {
@@ -428,7 +460,7 @@
 			var events = this.$cache('events');
 			if ( events[eventType] ) {
 				e || (e = new AnyEvent(eventType));
-				e.subject = this;
+				e.setSubject(this);
 				$each(events[eventType], function(listener) {
 					listener.callback.call(this, e);
 				}, this);
@@ -687,12 +719,28 @@
 				}
 			}
 			return this;
+		},
+		getPosition: function() {
+			var bcr = this.getBoundingClientRect();
+			return new Coords2D(bcr.left, bcr.top).add(W.getScroll());
+		},
+		getScroll: function() {
+			return new Coords2D(this.scrollLeft, this.scrollTop);
 		}
 	});
 
 	$extend(document, {
 		getElement: Element.prototype.getElement,
 		getElements: Element.prototype.getElements
+	});
+
+	$extend([W, D], {
+		getScroll: function() {
+			return new Coords2D(
+				document.documentElement.scrollLeft || document.body.scrollLeft,
+				document.documentElement.scrollTop || document.body.scrollTop
+			);
+		}
 	});
 
 	Event.Custom.ready = {

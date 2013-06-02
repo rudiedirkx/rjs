@@ -10,6 +10,11 @@ li.odd {
 li.even {
 	background: #ddd;
 }
+p.img {
+	background: #eee;
+	padding: 20px;
+	position: relative;
+}
 fieldset {
 	margin: 30px 0;
 }
@@ -25,17 +30,25 @@ pre {
 <body>
 
 
+<p>
+	<label><input type="checkbox" id="htmlmargin" /> HTML margin-left</label>
+	<label><input type="checkbox" id="htmlrelative" /> HTML relative</label>
+	<label><input type="checkbox" id="bodymargin" /> BODY margin-left</label>
+	<label><input type="checkbox" id="bodyrelative" /> BODY relative</label>
+	<label><input type="checkbox" id="fieldsetevents" /> FIELDSET mouse events</label>
+</p>
+
 <ul id="ul">
-<li><a href="#1">Link 1</a></li>
+<li><a href="#1"><span>Link 1</span></a></li>
 <!-- ASS! -->
-<li><a href="#2" data-not-deletable>Link 2</a></li>
+<li><a href="#2" data-not-deletable><span>Link 2</span></a></li>
 <!-- FACE! -->
-<li><a href="#3">Link 3</a></li>
+<li><a href="#3"><span>Link 3</span></a></li>
 </ul>
 
-<p id="-some-p">Just a shibling.</p>
+<p id="-some-p">Just a shibling (should copy to down here).</p>
 
-<p><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="150" /></p>
+<p class="img"><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="150" /></p>
 
 <form method="post" action>
 	<input type="hidden" value="hid it" />
@@ -108,6 +121,7 @@ window.on('load', function(e) {
 
 // Custom event: directchange
 function onDirectChange(e) {
+	console.log(e);
 	printSummary(this.value);
 }
 $('lastname').on('directchange', onDirectChange);
@@ -120,19 +134,19 @@ var ul = $('ul'),
 console.log('one P ', p);
 console.log('all Ps ', ps);
 links.each(function(a) {
-	a.setText(a.getText() + ' (X)');
+	a.setHTML(a.getHTML() + ' (XX)');
 });
 
 // Custom events: mouseenter & mouseleave
 $$('fieldset').on('mouseenter', function(e) {
-	console.log('fieldset mouseenter', e);
+	$('fieldsetevents').checked && console.log('fieldset mouseenter', e);
 }).on('mouseleave', function(e) {
-	console.log('fieldset mouseleave', e);
+	$('fieldsetevents').checked && console.log('fieldset mouseleave', e);
 });
 
 // Event delegation
 ul.on('click', 'a', function(e) {
-	e.stop();
+	e.preventDefault();
 	console.log('clicked A in UL', this, e);
 	this.parentNode.remove();
 	ul.zebra();
@@ -194,13 +208,41 @@ function doSomethingAsync() {
 	return eventable;
 }
 doSomethingAsync().on('yes', function() {
-	alert('[Eventable] YESSSSSS in ' + (Date.now() - this.time)/1000 + ' s');
+	console.log('[Eventable] YESSSSSS in ' + (Date.now() - this.time)/1000 + ' s');
 }).on('no', function() {
-	alert('[Eventable] Nooo =( in ' + (Date.now() - this.time)/1000 + ' s');
+	console.log('[Eventable] Nooo =( in ' + (Date.now() - this.time)/1000 + ' s');
 });
 
+// DOM options
+$('htmlmargin').on('change', function(e) {
+	document.documentElement.css('margin-left', this.checked ? '100px' : '');
+});
+$('htmlrelative').on('change', function(e) {
+	document.documentElement.css('position', this.checked ? 'relative' : '');
+});
+$('bodymargin').on('change', function(e) {
+	document.body.css('margin-left', this.checked ? '100px' : '');
+});
+$('bodyrelative').on('change', function(e) {
+	document.body.css('position', this.checked ? 'relative' : '');
+});
+
+// Event coordinates
+document.on('click', function(e) {
+	$('annoying').css('position', '');
+});
+var $imgP = $('p.img', 1);
+document.getElement('img').on('click', function(e) {
+	e.stopPropagation();
+	console.log(e.originalEvent.pageX, e);
+	var pageX = e.originalEvent.pageX,
+		pageY = e.originalEvent.pageY;
+	$('annoying').inject($imgP).css('position', 'absolute').css(e.pageXY.subtract($imgP.getPosition()).toCSS());
+});
 
 </script>
+
+<div id="annoying" style="background: red; width: 2000px; height: 20px;"></div>
 
 </body>
 
