@@ -247,6 +247,13 @@
 				left: this.x + 'px',
 				top: this.y + 'px'
 			};
+		},
+		join: function(glue) {
+			glue == null && (glue = ',');
+			return [this.x, this.y].join(glue);
+		},
+		equal: function(coord) {
+			return this.join() == coord.join();
 		}
 	});
 
