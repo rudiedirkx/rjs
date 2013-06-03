@@ -72,7 +72,7 @@
 				if ( Host == Element ) {
 					Elements.prototype[name] = function() {
 						var args = arguments;
-						return this.invoke(name, args, false);
+						return this.invoke(name, args);
 					};
 				}
 			});
@@ -209,19 +209,25 @@
 	});
 
 	function Elements(source) {
-		var self = this;
-		$each(source, function(el, i) {
-			el.nodeType === 1 && self.push(el);
-		});
+		this.length = 0;
+		source && $each(source, function(el, i) {
+			el.nodeType === 1 && this.push(el);
+		}, this);
 	}
-	Elements.prototype = Array.prototype;
+	Elements.prototype = new Array;
+	Elements.prototype.constructor = Elements;
 	$extend(Elements, {
-		invoke: function(method, args, returnSelf) {
-			var res = [];
+		invoke: function(method, args) {
+			var returnSelf = false,
+				res = [],
+				isElements = false;
 			$each(this, function(el, i) {
-				res.push( el[method].apply(el, args) );
+				var retEl = el[method].apply(el, args);
+				res.push( retEl );
+				if ( retEl == el ) returnSelf = true;
+				if ( retEl instanceof Element ) isElements = true;
 			});
-			return returnSelf ? this : res;
+			return returnSelf ? this : ( isElements || !res.length ? new Elements(res) : res );
 		}
 	});
 
@@ -493,7 +499,7 @@
 
 			return sibl;
 		},
-		remove: Element.prototype.remove || function() {
+		remove: function() {
 			return this.parentNode.removeChild(this);
 		},
 		getParent: function() {
@@ -563,18 +569,17 @@
 				}
 
 				// (un)set multiple attributes
-				var self = this;
 				$each(name, function(value, name) {
 					if ( value === null ) {
-						self.removeAttribute(prefix + name);
+						this.removeAttribute(prefix + name);
 					}
 					else {
 						if ( Element.attr2method[prefix + name] ) {
-							return Element.attr2method[prefix + name].call(self, value, prefix);
+							return Element.attr2method[prefix + name].call(this, value, prefix);
 						}
-						self.setAttribute(prefix + name, value);
+						this.setAttribute(prefix + name, value);
 					}
-				});
+				}, this);
 			}
 			// Unset single attribute
 			else if ( value === null ) {
