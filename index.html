@@ -228,6 +228,7 @@ var $imgP = $('p.img', 1);
 document.getElement('img').on('click', function(e) {
 	e.stopPropagation();
 	console.log(e.originalEvent.pageX, e);
+	printSummary(e.summary());
 	var pageX = e.originalEvent.pageX,
 		pageY = e.originalEvent.pageY;
 	$('annoying').inject($imgP).css('position', 'absolute').css(e.pageXY.subtract($imgP.getPosition()).toCSS());
