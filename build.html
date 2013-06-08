@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+
+<head>
+<style>
+ul {
+	-webkit-columns: 4;
+	-moz-columns: 4;
+	columns: 4;
+	list-style: none;
+	padding: 0;
+}
+li {
+	display: block;
+	padding: 0;
+}
+label {
+	display: inline-block;
+	padding: 1px 1px;
+	background: #faa;
+}
+.checked {
+	background: #afa;
+}
+pre {
+	tab-size: 4;
+}
+</style>
+</head>
+
+<body onload="init()">
+
+<p>
+	<button disabled>Download</button>
+	<span>?</span> KB / ~ <span>?</span> KB <a target=_blank href="http://marijnhaverbeke.nl/uglifyjs">minified</a>
+</p>
+
+<script src="rjs.js"></script>
+<script>
+var deps, $button, source, waiting = 2;
+
+function setSize(length) {
+	$button
+		.getNext().setText(Math.ceil(length / 100) / 10)
+		.getNext().setText(Math.ceil(0.55 * length / 100) / 10);
+}
+
+function build(size) {
+	var code = source;
+
+	// Don't add what's checked. Remove what's not.
+	$$('input:not(:checked)').each(function(inp) {
+		var name = inp.name;
+		var regex = new RegExp('\\/\\* <' + name + ' \\*\\/[\\s\\S]+?\\/\\* ' + name + '> \\*\\/', 'g');
+		code = code.replace(regex, '');
+	});
+
+	code = code.replace(/\/\*[\s\S]+?\*\//g, '').replace(/\t+[\r\n]/g, '').trim();
+
+	size && setSize(code.length);
+
+	return code;
+}
+
+function createTable(deps) {
+	var ul = document.el('ul');
+	$each(deps, function(x, name) {
+		var check = name[0] == '_' ? '' : 'checked';
+		document.el('li').setHTML('<label class="' + check + '"><input type=checkbox name="' + name + '" ' + check + ' disabled> ' + name + '</label>').inject(ul);
+	});
+
+	ul.on('change', 'input[type=checkbox]', function(e) {
+		this.parentNode.removeClass('checked').removeClass('unchecked').addClass(this.checked ? 'checked' : 'unchecked');
+		build(true);
+	});
+
+	return ul;
+}
+
+function ready() {
+	$$('[disabled]').attr('disabled', null);
+	build(true);
+}
+
+function init() {
+	$button = $('button', 1);
+
+	$.get('deps.json').on('success', function(e) {
+		deps = JSON.parse(this.responseText.validJSON());
+
+		createTable(deps).injectBefore($button);
+
+		--waiting || ready();
+	});
+
+	$.get('rjs.js').on('success', function(e) {
+		source = this.responseText;
+
+		--waiting || ready();
+	});
+
+	$button.on('click', function(e) {
+		var code = build(true),
+			blob = new Blob([code], {type: 'text/javascript'}),
+			uri = URL.createObjectURL(blob),
+			a = document.el('a', {href: uri, download: 'rjs-custom.js'});
+		a.click();
+	});
+}
+
+$extend(String, {
+	validJSON: function() {
+		return this.replace(/(\w+):/g, '"$1":').replace(/'/g, '"');
+	}
+});
+</script>
+
+</body>
+
+</html>

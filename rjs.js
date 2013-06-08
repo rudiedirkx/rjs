@@ -15,21 +15,27 @@
 	// Some hideous, very useful globals
 	var html = D.documentElement,
 		head = html.getElementsByTagName('head')[0];
-	W.html = html;
-	W.head = head;
 
+	/* <domready */
 	var domReadyAttached = false,
-		domIsReady = false,
-		cssDisplays = {};
+		domIsReady = false;
+	/* domready> */
 
+	/* <element_show */
+	var cssDisplays = {};
+	/* element_show> */
+
+	/* <ifsetor */
 	function $ifsetor(pri, sec) {
 		return pri !== undefined ? pri : sec;
 	}
+	/* ifsetor> */
 
 	function $arrayish(obj) {
 		return typeof obj.length == 'number' && typeof obj != 'string' && obj.constructor != Object;
 	}
 
+	/* <array */
 	function $array(list) {
 		var arr = [];
 		$each(list, function(el, i) {
@@ -37,20 +43,25 @@
 		});
 		return arr;
 	}
+	/* array> */
 
+	/* <class */
 	function $class(obj) {
 		var code = String(obj.constructor);
 		return code.match(/ (.+?)[\(\]]/)[1];
 	}
+	/* class> */
+
+	function $is_a(obj, type) {
+		return window[type] && obj instanceof window[type];
+	}
 
 	function $each(source, callback, context) {
-		// Assume []
 		if ( $arrayish(source) ) {
 			for ( var i=0, L=source.length; i<L; i++ ) {
 				callback.call(context, source[i], i, source);
 			}
 		}
-		// Assume {}
 		else {
 			for ( var k in source ) {
 				if ( source.hasOwnProperty(k) ) {
@@ -62,26 +73,31 @@
 		return source;
 	}
 
-	function $extend(Hosts, proto) {
+	function $extend(Hosts, proto, Super) {
 		if ( !(Hosts instanceof Array) ) {
 			Hosts = [Hosts];
 		}
 
 		$each(Hosts, function(Host) {
+			if ( Super ) {
+				Host.prototype = Super;
+				Host.prototype.constructor = Host;
+			}
+
 			var methodOwner = Host.prototype ? Host.prototype : Host;
 			$each(proto, function(fn, name) {
 				methodOwner[name] = fn;
 
-				if ( Host == Element ) {
+				if ( Host == Element && !Elements.prototype[name] ) {
 					Elements.prototype[name] = function() {
-						var args = arguments;
-						return this.invoke(name, args);
+						return this.invoke(name, arguments);
 					};
 				}
 			});
 		});
 	}
 
+	/* <getter */
 	function $getter(Host, prop, getter) {
 		if ( Object.defineProperty ) {
 			Object.defineProperty(Host.prototype, prop, {get: getter})
@@ -90,11 +106,16 @@
 			Host.prototype.__defineGetter__(prop, getter);
 		}
 	}
+	/* getter> */
 
 	$extend(Array, {
+		/* <array_contains */
 		contains: function(obj) {
 			return this.indexOf(obj) != -1;
 		},
+		/* array_contains> */
+
+		/* <array_unique */
 		unique: function() {
 			var els = [];
 			$each(this, function(el) {
@@ -102,21 +123,31 @@
 			});
 			return els;
 		},
+		/* array_unique> */
+
+		/* <array_each */
 		each: function(callback, context) {
 			return $each(this, callback, context);
 		},
+		/* array_each> */
+
+		/* <array_firstlast */
 		first: function() {
 			return this[0] || null;
 		},
 		last: function() {
 			return this[this.length-1] || null;
 		}
+		/* array_firstlast> */
 	});
+	/* <array_defaultfilter */
 	Array.defaultFilterCallback = function(item, i, list) {
 		return !!item;
 	};
+	/* array_defaultfilter> */
 
 	$extend(String, {
+		/* <string_camel */
 		camel: function() {
 			// foo-bar => fooBar, -ms-foo => MsFoo
 			return this.replace(/\-([^\-])/g, function(a, m) {
@@ -128,6 +159,7 @@
 				return '-' + m.toLowerCase();
 			});
 		}
+		/* string_camel> */
 	});
 
 	var indexOf = [].indexOf,
@@ -137,15 +169,15 @@
 		join = [].join,
 		pop = [].join;
 
-	// Date.now polyfill //
+	/* <_date_now */
 	typeof Date.now == 'function' || (Date.now = function() {
 		return +new Date;
 	});
-	// Date.now polyfill //
+	/* _date_now> */
 
-	// classList polyfill //
+	/* <_classlist */
 	if (!('classList' in html)) {
-		(function() { // Do this just for strict mode?
+		(function() { // Go strict mode!?
 			function DOMTokenList(el) {
 				this._el = el;
 				el.$classList = this;
@@ -202,24 +234,17 @@
 			});
 		})();
 	}
-	// classList polyfill //
+	/* _classlist> */
 
-	$extend(DOMTokenList, {
-		replace: function(before, after) {
-			this.remove(before);
-			this.add(after);
-		}
-	});
-
+	/* <elements */
 	function Elements(source) {
 		this.length = 0;
 		source && $each(source, function(el, i) {
 			el.nodeType === 1 && this.push(el);
 		}, this);
 	}
-	Elements.prototype = new Array;
-	Elements.prototype.constructor = Elements;
 	$extend(Elements, {
+		/* <elements_invoke */
 		invoke: function(method, args) {
 			var returnSelf = false,
 				res = [],
@@ -232,34 +257,53 @@
 			});
 			return returnSelf ? this : ( isElements || !res.length ? new Elements(res) : res );
 		}
-	});
+		/* elements_invoke> */
+	}, new Array);
+	/* elements> */
 
+	/* <coords2d */
 	function Coords2D(x, y) {
 		this.x = x;
 		this.y = y;
 	}
 	$extend(Coords2D, {
+		/* <coords2d_add */
 		add: function(coords) {
 			return new Coords2D(this.x + coords.x, this.y + coords.y);
 		},
+		/* coords2d_add> */
+
+		/* <coords2d_subtract */
 		subtract: function(coords) {
 			return new Coords2D(this.x - coords.x, this.y - coords.y);
 		},
+		/* coords2d_subtract> */
+
+		/* <coords2d_tocss */
 		toCSS: function() {
 			return {
 				left: this.x + 'px',
 				top: this.y + 'px'
 			};
 		},
+		/* coords2d_tocss> */
+
+		/* <coords2d_join */
 		join: function(glue) {
 			glue == null && (glue = ',');
 			return [this.x, this.y].join(glue);
 		},
+		/* coords2d_join> */
+
+		/* <coords2d_equal */
 		equal: function(coord) {
 			return this.join() == coord.join();
 		}
+		/* coords2d_equal> */
 	});
+	/* coords2d> */
 
+	/* <anyevent */
 	function AnyEvent(e) {
 		if ( typeof e == 'string' ) {
 			this.originalEvent = null;
@@ -293,19 +337,23 @@
 		this.clientX = e.clientX;
 		this.clientY = e.clientY;
 
-		this.touches = e.touches ? $array(e.touches) : undefined;
+		/* <anyevent_touches */
+		this.touches = e.touches;
 
 		if ( this.touches && this.touches[0] ) {
 			this.pageX = this.touches[0].pageX;
 			this.pageY = this.touches[0].pageY;
 		}
+		/* anyevent_touches> */
 
+		/* <anyevent_pagexy */
 		if ( this.pageX != null && this.pageY != null ) {
 			this.pageXY = new Coords2D(this.pageX, this.pageY);
 		}
 		else if ( this.clientX != null && this.clientY != null ) {
 			this.pageXY = new Coords2D(this.clientX, this.clientY).add(W.getScroll());
 		}
+		/* anyevent_pagexy> */
 
 		this.data = e.clipboardData;
 		this.time = e.timeStamp || e.timestamp || e.time || Date.now();
@@ -314,12 +362,13 @@
 		this.loaded = e.loaded || e.position;
 	}
 	$extend(AnyEvent, {
+		/* <anyevent_summary */
 		summary: function(prefix) {
 			prefix || (prefix = '');
 			var summary = [];
 			$each(this, function(value, name) {
 				var original = value;
-				if ( original && original instanceof Coords2D ) {
+				if ( original && $is_a(original, 'Coords2D') ) {
 					value = original.join();
 				}
 				else if ( original && typeof original == 'object' ) {
@@ -332,6 +381,8 @@
 			});
 			return summary.join("\n");
 		},
+		/* anyevent_summary> */
+
 		preventDefault: function() {
 			var e = this.originalEvent;
 			e.preventDefault && e.preventDefault();
@@ -342,6 +393,8 @@
 			e.stopPropagation && e.stopPropagation();
 			e.cancelBubble = true;
 		},
+
+		/* <anyevent_subject */
 		setSubject: function(subject) {
 			this.subject = subject;
 			if ( this.pageXY ) {
@@ -351,11 +404,17 @@
 				}
 			}
 		}
+		/* anyevent_subject> */
 	});
+	/* anyevent> */
 
+	/* <event_keys */
 	Event.Keys = {"enter": 13, "up": 38, "down": 40, "left": 37, "right": 39, "esc": 27, "space": 32, "backspace": 8, "tab": 9, "delete": 46};
+	/* event_keys> */
 
+	/* <event_custom */
 	Event.Custom = {
+		/* <_event_custom_mousenterleave */
 		mouseenter: {
 			type: 'mouseover',
 			filter: function(e) {
@@ -368,9 +427,15 @@
 				return e.toElement != this && !this.contains(e.toElement);
 			}
 		},
+		/* _event_custom_mousenterleave> */
+
+		/* <event_custom_mousewheel */
 		mousewheel: {
 			type: 'onmousewheel' in W ? 'mousewheel' : 'mousescroll'
 		},
+		/* event_custom_mousewheel> */
+
+		/* <event_custom_directchange */
 		directchange: {
 			type: 'keyup',
 			filter: function(e) {
@@ -380,21 +445,37 @@
 				return lastValue == null || lastValue != currentValue;
 			}
 		}
+		/* event_custom_directchange> */
 	};
+
+	/* <_event_custom_mousenterleave */
 	'onmouseenter' in html && delete Event.Custom.mouseenter;
 	'onmouseleave' in html && delete Event.Custom.mouseleave;
+	/* _event_custom_mousenterleave> */
+	/* event_custom> */
 
-	$each([window, document, Element, Elements], function(Host) {
+	/* <native_extend */
+	$each([
+		window, 
+		document, 
+		Element,
+		/* <native_extend_elements */
+		Elements
+		/* native_extend_elements> */
+	], function(Host) {
 		Host.extend = function(methods) {
 			$extend([this], methods);
 		};
 	});
+	/* native_extend> */
 
+	/* <eventable */
 	function Eventable(subject) {
 		this.subject = subject;
 		this.time = Date.now();
 	}
 	$extend(Eventable, {
+		/* <eventable_cache */
 		"$cache": function(name, value, defaultValue) {
 			this.$$cache || (this.$$cache = {});
 			this.$$cache[name] || (this.$$cache[name] = defaultValue || {});
@@ -405,18 +486,27 @@
 
 			return this.$$cache[name];
 		},
+		/* eventable_cache> */
+
+		/* <eventable_listen */
 		_addEventListener: function(eventType, callback) {
 			if ( this.addEventListener ) {
 				this.addEventListener(eventType, callback);
 			}
 			return this;
 		},
+		/* eventable_listen> */
+
+		/* <eventable_unlisten */
 		_removeEventListener: function(eventType, callback) {
 			if ( this.removeEventListener ) {
 				this.removeEventListener(eventType, callback);
 			}
 			return this;
 		},
+		/* eventable_unlisten> */
+
+		/* <eventable_on */
 		on: function(eventType, matches, callback) {
 			callback || (callback = matches) && (matches = null);
 
@@ -461,16 +551,9 @@
 
 			return this._addEventListener(baseType, onCallback);
 		},
-		fire: function(eventType, e) {
-			var events = this.$cache('events');
-			if ( events[eventType] ) {
-				e || (e = new AnyEvent(eventType));
-				$each(events[eventType], function(listener) {
-					listener.callback.call(this, e);
-				}, this);
-			}
-			return this;
-		},
+		/* eventable_on> */
+
+		/* <eventable_off */
 		off: function(eventType, callback) {
 			var events = this.$cache('events');
 			if ( events[eventType] ) {
@@ -486,6 +569,22 @@
 			}
 			return this;
 		},
+		/* eventable_off> */
+
+		/* <eventable_fire */
+		fire: function(eventType, e) {
+			var events = this.$cache('events');
+			if ( events[eventType] ) {
+				e || (e = new AnyEvent(eventType));
+				$each(events[eventType], function(listener) {
+					listener.callback.call(this, e);
+				}, this);
+			}
+			return this;
+		},
+		/* eventable_fire> */
+
+		/* <eventable_globalfire */
 		globalFire: function(globalType, localType, originalEvent) {
 			var e = originalEvent ? originalEvent : new AnyEvent(localType),
 				eventType = (globalType + '-' + localType).camel();
@@ -495,12 +594,17 @@
 			W.fire(eventType, e);
 			return this;
 		}
+		/* eventable_globalfire> */
 	});
+	/* eventable> */
 
+	/* <native_eventable */
 	$extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
 	W.XMLHttpRequestUpload && $extend([XMLHttpRequestUpload], Eventable.prototype);
+	/* native_eventable> */
 
 	$extend([Element, Text], {
+		/* <element_ancestor */
 		firstAncestor: function(selector) {
 			var el = this;
 			while ( (el = el.parentNode) && el != D ) {
@@ -509,6 +613,9 @@
 				}
 			}
 		},
+		/* element_ancestor> */
+
+		/* <element_siblings */
 		getNext: function() {
 			if ( this.nextElementSibling !== undefined ) {
 				return this.nextElementSibling;
@@ -529,12 +636,21 @@
 
 			return sibl;
 		},
+		/* element_siblings> */
+
+		/* <element_remove */
 		remove: function() {
 			return this.parentNode.removeChild(this);
 		},
+		/* element_remove> */
+
+		/* <element_parent */
 		getParent: function() {
 			return this.parentNode;
 		},
+		/* element_parent> */
+
+		/* <element_insertafter */
 		insertAfter: function(el, ref) {
 			var next = ref.nextSibling; // including Text
 			if ( next ) {
@@ -542,8 +658,10 @@
 			}
 			return this.appendChild(el);
 		}
+		/* element_insertafter> */
 	});
 
+	/* <document_el */
 	$extend(document, {
 		el: function(tag, attrs) {
 			var el = this.createElement(tag);
@@ -551,28 +669,49 @@
 			return el;
 		}
 	});
+	/* document_el> */
+
 	Element.attr2method = {
+		/* <element_attr2method_html */
 		html: function(value) {
 			return value == null ? this.getHTML() : this.setHTML(value);
 		},
+		/* element_attr2method_html> */
+
+		/* <element_attr2method_text */
 		text: function(value) {
 			return value == null ? this.getText() : this.setText(value);
 		}
+		/* element_attr2method_text> */
 	};
 
+	var EP = Element.prototype;
 	$extend(Element, {
-		is: Element.prototype.matches || Element.prototype.webkitMatches || Element.prototype.mozMatches || Element.prototype.msMatches || Element.prototype.oMatches || Element.prototype.matchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || function(selector) {
+		/* <element_is */
+		is: EP.matches || EP.webkitMatches || EP.mozMatches || EP.msMatches || EP.oMatches || EP.matchesSelector || EP.webkitMatchesSelector || EP.mozMatchesSelector || EP.msMatchesSelector || EP.oMatchesSelector || function(selector) {
 			return $$(selector).contains(this);
 		},
+		/* element_is> */
+
+		/* <element_ancestor */
 		selfOrFirstAncestor: function(selector) {
 			return this.is(selector) ? this : this.firstAncestor(selector);
 		},
-		contains: Element.prototype.contains || function(child) {
+		/* element_ancestor> */
+
+		/* <_element_contains */
+		contains: function(child) {
 			return this.getElements('*').contains(child);
 		},
+		/* _element_contains> */
+
+		/* <element_children */
 		getChildren: function() {
 			return new Elements(this.children || this.childNodes);
 		},
+		/* element_children> */
+
+		/* <element_firstlast */
 		getFirst: function() {
 			if ( this.firstElementChild !== undefined ) {
 				return this.firstElementChild;
@@ -587,14 +726,20 @@
 
 			return this.getChildren().last();
 		},
+		/* element_firstlast> */
+
+		/* <element_attr */
 		attr: function(name, value, prefix) {
 			prefix == null && (prefix = '');
 			if ( value === undefined ) {
 				// Get single attribute
 				if ( typeof name == 'string' ) {
+					/* <element_attr2method */
 					if ( Element.attr2method[prefix + name] ) {
 						return Element.attr2method[prefix + name].call(this, value, prefix);
 					}
+					/* element_attr2method> */
+
 					return this.getAttribute(prefix + name);
 				}
 
@@ -604,9 +749,12 @@
 						this.removeAttribute(prefix + name);
 					}
 					else {
+						/* <element_attr2method */
 						if ( Element.attr2method[prefix + name] ) {
 							return Element.attr2method[prefix + name].call(this, value, prefix);
 						}
+						/* element_attr2method> */
+
 						this.setAttribute(prefix + name, value);
 					}
 				}, this);
@@ -620,17 +768,27 @@
 				if ( typeof value == 'function' ) {
 					value = value.call(this, this.getAttribute(prefix + name));
 				}
+
+				/* <element_attr2method */
 				if ( Element.attr2method[prefix + name] ) {
 					return Element.attr2method[prefix + name].call(this, value, prefix);
 				}
+				/* element_attr2method> */
+
 				this.setAttribute(prefix + name, value);
 			}
 
 			return this;
 		},
+		/* element_attr> */
+
+		/* <element_data */
 		data: function(name, value) {
 			return this.attr(name, value, 'data-');
 		},
+		/* element_data> */
+
+		/* <element_html */
 		getHTML: function() {
 			return this.innerHTML;
 		},
@@ -638,6 +796,9 @@
 			this.innerHTML = html;
 			return this;
 		},
+		/* element_html> */
+
+		/* <element_text */
 		getText: function() {
 			return this.innerText || this.textContent;
 		},
@@ -645,12 +806,19 @@
 			this.textContent = this.innerText = text;
 			return this;
 		},
+		/* element_text> */
+
 		getElement: function(selector) {
 			return this.querySelector(selector);
 		},
+
+		/* <elements */
 		getElements: function(selector) {
 			return $$(this.querySelectorAll(selector));
 		},
+		/* elements> */
+
+		/* <element_class */
 		removeClass: function(token) {
 			this.classList.remove(token);
 			return this;
@@ -664,9 +832,11 @@
 			return this;
 		},
 		replaceClass: function(before, after) {
-			this.classList.replace(before, after);
-			return this;
+			return this.removeClass(before).addClass(after);
 		},
+		/* element_class> */
+
+		/* <element_inject */
 		injectBefore: function(ref) {
 			ref.parentNode.insertBefore(this, ref);
 			return this;
@@ -679,17 +849,29 @@
 			parent.appendChild(this);
 			return this;
 		},
+		/* element_inject> */
+
+		/* <element_append */
 		append: function(child) {
 			this.appendChild(child);
 			return this;
 		},
+		/* element_append> */
+
+		/* <element_hover */
 		hover: function(matches, over, out) {
 			matches || (out = over) && (over = matches) && (matches = null);
 			return this.on('mouseenter', over).on('mouseleave', out);
 		},
+		/* element_hover> */
+
+		/* <element_style */
 		getStyle: function(property) {
 			return getComputedStyle(this).getPropertyValue(property);
 		},
+		/* element_style> */
+
+		/* <element_css */
 		css: function(property, value) {
 			if ( value === undefined ) {
 				// Get single property
@@ -708,6 +890,9 @@
 			this.style[property] = value;
 			return this;
 		},
+		/* element_css> */
+
+		/* <element_show */
 		show: function() {
 			if ( !cssDisplays[this.nodeName] ) {
 				var el = document.el(this.nodeName).inject(this.ownerDocument.body);
@@ -722,6 +907,9 @@
 		toggle: function() {
 			return this.getStyle('display') == 'none' ? this.show() : this.hide();
 		},
+		/* element_show> */
+
+		/* <element_empty */
 		empty: function() {
 			try {
 				this.innerHTML = '';
@@ -733,13 +921,20 @@
 			}
 			return this;
 		},
+		/* element_empty> */
+
+		/* <element_position */
 		getPosition: function() {
 			var bcr = this.getBoundingClientRect();
 			return new Coords2D(bcr.left, bcr.top).add(W.getScroll());
 		},
+		/* element_position> */
+
+		/* <element_scroll */
 		getScroll: function() {
 			return new Coords2D(this.scrollLeft, this.scrollTop);
 		}
+		/* element_scroll> */
 	});
 
 	$extend(document, {
@@ -747,6 +942,7 @@
 		getElements: Element.prototype.getElements
 	});
 
+	/* <windoc_scroll */
 	$extend([W, D], {
 		getScroll: function() {
 			return new Coords2D(
@@ -755,7 +951,9 @@
 			);
 		}
 	});
+	/* windoc_scroll> */
 
+	/* <domready */
 	Event.Custom.ready = {
 		before: function() {
 			if ( this == document ) {
@@ -782,8 +980,10 @@
 			D.attachEvent('onreadystatechange', onDomReady);
 		}
 	}
+	/* domready> */
 
 	function $(id, selector) {
+		/* <domready */
 		if ( typeof id == 'function' ) {
 			if ( domIsReady ) {
 				setTimeout(id, 1);
@@ -792,6 +992,7 @@
 
 			return D.on('ready', id);
 		}
+		/* domready> */
 
 		// By [id]
 		if ( !selector ) {
@@ -802,20 +1003,24 @@
 		return D.getElement(id);
 	}
 
+	/* <elements */
 	function $$(selector) {
 		return $arrayish(selector) ? new Elements(selector) : D.getElements(selector);
 	}
+	/* elements> */
 
+	/* <xhr */
 	function XHR(url, options) {
 		options || (options = {});
-		var xhr = new XMLHttpRequest,
-			method = $ifsetor(options.method, 'GET').toUpperCase(),
-			async = $ifsetor(options.async, true),
-			send = $ifsetor(options.send, true),
-			data = options.data || '';
-		xhr.open(method, url, async, options.username, options.password);
-		xhr.url = url;
-		xhr.method = method;
+		options.method = (options.method ? options.method : 'GET').toUpperCase();
+		options.async != null || (options.async = true);
+		options.send != null || (options.send = true);
+		options.data != null || (options.data = null);
+		options.url = url;
+
+		var xhr = new XMLHttpRequest;
+		xhr.open(options.method, options.url, options.async, options.username, options.password);
+		xhr.options = options;
 		xhr.on('readystatechange', function(e) {
 			if ( this.readyState == 4 ) {
 				var success = this.status == 200,
@@ -823,21 +1028,26 @@
 				// Specific events
 				this.fire(eventType, e);
 				this.fire('done', e);
+
+				/* <xhr_global */
 				// Global events
 				this.globalFire('xhr', eventType, e);
 				this.globalFire('xhr', 'done', e);
+				/* xhr_global> */
 			}
 		});
-		if ( method == 'POST' ) {
-			if ( !data.constructor || data.constructor != window.FormData ) {
+		if ( options.method == 'POST' ) {
+			if ( !$is_a(options.data, 'FormData') ) {
 				var encoding = options.encoding ? '; charset=' + encoding : '';
 				xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded' + encoding);
 			}
 		}
-		if ( send ) {
+		if ( options.send ) {
+			/* <xhr_global */
 			xhr.globalFire('xhr', 'start');
+			/* xhr_global> */
 			xhr.fire('start');
-			xhr.send(data);
+			xhr.send(options.data);
 		}
 		return xhr;
 	}
@@ -851,14 +1061,23 @@
 			return xhr;
 		};
 	}
+	/* xhr> */
+
+
 
 	// Expose
 	W.$ifsetor = $ifsetor;
+	W.$arrayish = $arrayish;
+	/* <array */
+	W.$array = $array;
 	W.$class = $class;
-	W.$ = $;
-	W.$$ = $$;
+	W.$is_a = $is_a;
 	W.$each = $each;
 	W.$extend = $extend;
+	W.$getter = $getter;
+
+	W.$ = $;
+	W.$$ = $$;
 
 	W.Elements = Elements;
 	W.AnyEvent = AnyEvent;

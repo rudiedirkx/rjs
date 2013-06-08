@@ -178,7 +178,7 @@ $(function() {
 				alert('onSuccess?? ' + this.responseText.length + ' bytes');
 				printSummary(e.summary());
 			}).on('error', function(e) {
-				alert('onError: ' + this.url);
+				alert('onError: ' + this.options.url);
 				printSummary(e.summary());
 			});
 		}
