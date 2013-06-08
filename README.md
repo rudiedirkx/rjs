@@ -30,7 +30,7 @@ All elements by selector:
 	els = $$('div');
 	els = document.getElements('div');
 
-Find <TH>s in a <TR>:
+Find `<TH>`s in a `<TR>`:
 
 	tr = ...
 	ths = tr.getElements('th');
