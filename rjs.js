@@ -1066,27 +1066,49 @@
 
 
 	// Expose
+	/* <ifsetor */
 	W.$ifsetor = $ifsetor;
+	/* ifsetor> */
 	W.$arrayish = $arrayish;
 	/* <array */
 	W.$array = $array;
+	/* array> */
+	/* <class */
 	W.$class = $class;
+	/* class> */
+	/* <is_a */
 	W.$is_a = $is_a;
+	/* is_a> */
 	W.$each = $each;
 	W.$extend = $extend;
+	/* <getter */
 	W.$getter = $getter;
+	/* getter> */
 
 	W.$ = $;
+
+	/* <elements */
 	W.$$ = $$;
-
 	W.Elements = Elements;
-	W.AnyEvent = AnyEvent;
-	W.Eventable = Eventable;
-	W.Coords2D = Coords2D;
+	/* elements> */
 
+	/* <anyevent */
+	W.AnyEvent = AnyEvent;
+	/* anyevent> */
+
+	/* <eventable */
+	W.Eventable = Eventable;
+	/* eventable> */
+
+	/* <coords2d */
+	W.Coords2D = Coords2D;
+	/* coords2d> */
+
+	/* <xhr */
 	W.$.xhr = XHR;
 	W.$.get = shortXHR('get');
 	W.$.post = shortXHR('post');
+	/* xhr> */
 
 	// } catch (ex) { alert(ex); }
 
