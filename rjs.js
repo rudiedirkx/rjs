@@ -12,7 +12,6 @@
 
 	// try {
 
-	// Some hideous, very useful globals
 	var html = D.documentElement,
 		head = html.getElementsByTagName('head')[0];
 
@@ -171,7 +170,12 @@
 	/* _date_now> */
 
 	/* <_classlist */
-	'classList' in html || (W.DOMTokenList = (function(DOMTokenList) {
+	if (!('classList' in html)) {
+		var DOMTokenList = function(el) {
+			this._el = el;
+			el.$classList = this;
+			this._reinit();
+		}
 		$extend(DOMTokenList, {
 			_reinit: function() {
 				// Empty
@@ -216,15 +220,9 @@
 		});
 
 		$getter(Element, 'classList', function() {
-			return this.$classList ? this.$classList._reinit() : new DOMTokenList(this);
+			return this.classList ? this.classList._reinit() : new DOMTokenList(this);
 		});
-
-		return DOMTokenList;
-	})(function(el) {
-		this._el = el;
-		el.$classList = this;
-		this._reinit();
-	}));
+	}
 	/* _classlist> */
 
 	/* <elements */
@@ -309,8 +307,8 @@
 		this.relatedTarget = e.relatedTarget;
 		this.fromElement = e.fromElement;
 		this.toElement = e.toElement;
-		//this.which = e.which;
-		//this.keyCode = e.keyCode;
+		// this.which = e.which;
+		// this.keyCode = e.keyCode;
 		this.key = e.keyCode || e.which;
 		this.alt = e.altKey;
 		this.ctrl = e.ctrlKey;
@@ -841,6 +839,10 @@
 		},
 		inject: function(parent) {
 			parent.appendChild(this);
+			return this;
+		},
+		injectTop: function(parent) {
+			parent.firstChild ? parent.insertBefore(this, parent.firstChild) : parent.appendChild(this);
 			return this;
 		},
 		/* element_inject> */

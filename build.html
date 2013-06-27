@@ -31,6 +31,7 @@ pre {
 <body onload="init()">
 
 <p>
+	(<a id=save href="#">save</a>)
 	<button disabled>Download</button>
 	<span>?</span> KB / ~ <span>?</span> KB <a target=_blank href="http://marijnhaverbeke.nl/uglifyjs">minified</a>
 </p>
@@ -39,7 +40,9 @@ pre {
 
 <script src="rjs.js"></script>
 <script>
-var deps, $button, source, waiting = 2;
+"use strict";
+
+var deps, $button, $save, source, waiting = 2;
 
 function setSize(length) {
 	$button
@@ -57,7 +60,7 @@ function build(size) {
 		code = code.replace(regex, '');
 	});
 
-	code = code.replace(/\/\*[\s\S]+?\*\//g, '').replace(/\t+[\r\n]/g, '').trim();
+	code = code.replace(/\/\*[\s\S]+?\*\//g, '').replace(/\/\/ .+/g, '').replace(/\t+[\r\n]/g, '').trim();
 	$('code').setText(code);
 
 	size && setSize(code.length);
@@ -73,11 +76,29 @@ function createTable(deps) {
 	});
 
 	ul.on('change', 'input[type=checkbox]', function(e) {
-		this.parentNode.removeClass('checked').removeClass('unchecked').addClass(this.checked ? 'checked' : 'unchecked');
+		cbColor(cb);
 		build(true);
 	});
 
 	return ul;
+}
+
+function cbColor(cb) {
+	cb.parentNode.removeClass('checked').removeClass('unchecked').addClass(cb.checked ? 'checked' : 'unchecked');
+}
+
+function reinState() {
+	if ( location.hash.length > 1 ) {
+		var state = location.hash.substr(1).split(',');
+		state.forEach(function(name) {
+			var checked = '+' == name[0],
+				cb = $('input[name="' + name.substr(1) + '"]', 1);
+			if ( cb ) {
+				cb.checked = checked;
+				cbColor(cb);
+			}
+		});
+	}
 }
 
 function ready() {
@@ -87,11 +108,13 @@ function ready() {
 
 function init() {
 	$button = $('button', 1);
+	$save = $('save');
 
 	$.get('deps.json').on('success', function(e) {
 		deps = JSON.parse(this.responseText.validJSON());
 
-		createTable(deps).injectBefore($button);
+		createTable(deps).injectTop(document.body);
+		reinState();
 
 		--waiting || ready();
 	});
@@ -108,6 +131,16 @@ function init() {
 			uri = URL.createObjectURL(blob),
 			a = document.el('a', {href: uri, download: 'rjs-custom.js'});
 		a.click();
+	});
+
+	$save.on('click', function(e) {
+		var state = [];
+		$$('ul input[type=checkbox]').each(function(el) {
+			if ( el.checked != el.defaultChecked ) {
+				state.push((el.checked ? '+' : '-') + el.name);
+			}
+		});
+		this.href = '#' + state.join(',');
 	});
 }
 
