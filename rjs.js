@@ -171,62 +171,57 @@
 
 	/* <_classlist */
 	if (!('classList' in html)) {
-		// This IIFE is necessary because:
-		// * strict mode requires function definitions to be in the scope header
-		// * it has to be a named function (instead of var DOMTokenList = function(){}) because otherwise the class name isn't in the toString
-		(function() {
-			function DOMTokenList(el) {
-				this._el = el;
-				el.$classList = this;
-				this._reinit();
-			}
-			$extend(DOMTokenList, {
-				_reinit: function() {
-					// Empty
-					this.length = 0;
+		W.DOMTokenList = function DOMTokenList(el) {
+			this._el = el;
+			el.$classList = this;
+			this._reinit();
+		}
+		$extend(W.DOMTokenList, {
+			_reinit: function() {
+				// Empty
+				this.length = 0;
 
-					// Fill
-					var classes = this._el.className.trim();
-					classes = classes ? classes.split(/\s+/g) : [];
-					for ( var i=0, L=classes.length; i<L; i++ ) {
-						push.call(this, classes[i]);
-					}
-
-					return this;
-				},
-				set: function() {
-					this._el.className = join.call(this, ' ');
-				},
-				add: function(token) {
-					push.call(this, token);
-					this.set();
-				},
-				contains: function(token) {
-					return indexOf.call(this, token) !== -1;
-				},
-				item: function(index) {
-					return this[index] || null;
-				},
-				remove: function(token) {
-					var i = indexOf.call(this, token);
-					if ( i != -1 ) {
-						splice.call(this, i, 1);
-						this.set();
-					}
-				},
-				toggle: function(token) {
-					if ( this.contains(token) ) {
-						return !!this.remove(token);
-					}
-
-					return !this.add(token);
+				// Fill
+				var classes = this._el.className.trim();
+				classes = classes ? classes.split(/\s+/g) : [];
+				for ( var i=0, L=classes.length; i<L; i++ ) {
+					push.call(this, classes[i]);
 				}
-			});
 
-			$getter(Element, 'classList', function() {
-				return this.$classList ? this.$classList._reinit() : new DOMTokenList(this);
-			});
-		})();
+				return this;
+			},
+			set: function() {
+				this._el.className = join.call(this, ' ');
+			},
+			add: function(token) {
+				push.call(this, token);
+				this.set();
+			},
+			contains: function(token) {
+				return indexOf.call(this, token) !== -1;
+			},
+			item: function(index) {
+				return this[index] || null;
+			},
+			remove: function(token) {
+				var i = indexOf.call(this, token);
+				if ( i != -1 ) {
+					splice.call(this, i, 1);
+					this.set();
+				}
+			},
+			toggle: function(token) {
+				if ( this.contains(token) ) {
+					return !!this.remove(token);
+				}
+
+				return !this.add(token);
+			}
+		});
+
+		$getter(Element, 'classList', function() {
+			return this.$classList ? this.$classList._reinit() : new W.DOMTokenList(this);
+		});
 	}
 	/* _classlist> */
 
