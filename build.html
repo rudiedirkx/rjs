@@ -35,6 +35,8 @@ pre {
 	<span>?</span> KB / ~ <span>?</span> KB <a target=_blank href="http://marijnhaverbeke.nl/uglifyjs">minified</a>
 </p>
 
+<pre id=code></pre>
+
 <script src="rjs.js"></script>
 <script>
 var deps, $button, source, waiting = 2;
@@ -56,6 +58,7 @@ function build(size) {
 	});
 
 	code = code.replace(/\/\*[\s\S]+?\*\//g, '').replace(/\t+[\r\n]/g, '').trim();
+	$('code').setText(code);
 
 	size && setSize(code.length);
 

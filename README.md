@@ -63,6 +63,10 @@ Handle propagated click event:
 		alert('Clicked on ' + img.nodeName + ': ' + e.subjectXY.x + ', ' + e.subjectXY.y);
 	});
 
+Create DOM elements and use them almost sensibly:
+
+	document.el('pre', {lang: 'javascript'}).addClass('debug').inject(document.body);
+
 Create tooltips from [title] attributes:
 
 	$$('[title]').on('mouseenter', function(e) {
@@ -122,3 +126,83 @@ Ajax delete something:
 	$.xhr('/movie/14/comments', {method: 'delete'}).on('success', function(e) {
 		console.log('deleted something!', e);
 	});
+
+Extend HTML elements like this:
+
+	Element.extend({
+		toggle: function() {
+			return this.getStyle('display') == 'none' ? this.show() : this.css('display', 'none');
+		}
+	});
+	// This will now work for Element and Elements
+	$('my-div').toggle();
+	$$('.crazy-column').toggle();
+
+Extend other classes like this:
+
+	$extend(AnyEvent, {
+		stop: function() {
+			return this.preventDefault && this.stopPropagation();
+		}
+	});
+
+Use attr2method for easy attr() access:
+
+	Element.attr2method.click = function(value) {
+		return this.on('click', value);
+	};
+	// Now you can:
+	el.attr('click', function() { /* do stuff */ });
+
+Use summary() if you're debugging events:
+
+	document.on('keyup', function(e) {
+		console.log(e.summary());
+	});
+
+Coordinates are now easy:
+
+	$('my-img').on('click', function(e) {
+		var C = e.subjectXY; // {x: Number, y: Number}
+		// Place my red round 20*20px marker there
+		$('red-round-marker').css( C.subtract({x: 10, y: 10}).toCSS() ).show();
+	});
+
+And even easier if you need a reverse():
+
+	$extend(Coords2D, {
+		multiply: function(factor) {
+			return new Coords2D(this.x * factor, this.y * factor);
+		},
+		reverse: function() {
+			return this.multiply(-1);
+		}
+	});
+
+Use Event.Keys to remember (or not) key codes:
+
+	// Don't do this =)
+	document.on('keyup', function(e) {
+		// I HATE it when spacebar makes me scroll down
+		var input = e.target.is('input, select, textarea, a, [tabindex]'),
+			space = e.key == Event.Keys.space;
+		if ( space && !input ) {
+			// I'm not sure this would actually stop it...
+			e.preventDefault();
+		}
+	});
+
+Custom events (or hooks if you want):
+
+	Event.Custom.change = {
+		before: function() {
+			// Someone's attaching an onchange listener to `this`.
+			// We'll see about that:
+			return Math.random() > 0.5;
+		},
+		filter: function(e) {
+			// Someone's triggered an onchange listener on `this`.
+			// We'll see about that:
+			return Math.random() > 0.5;
+		}
+	};

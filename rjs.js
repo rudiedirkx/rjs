@@ -99,12 +99,7 @@
 
 	/* <getter */
 	function $getter(Host, prop, getter) {
-		if ( Object.defineProperty ) {
-			Object.defineProperty(Host.prototype, prop, {get: getter})
-		}
-		else {
-			Host.prototype.__defineGetter__(prop, getter);
-		}
+		Object.defineProperty(Host.prototype, prop, {get: getter});
 	}
 	/* getter> */
 
@@ -176,71 +171,67 @@
 	/* _date_now> */
 
 	/* <_classlist */
-	if (!('classList' in html)) {
-		(function() { // Go strict mode!?
-			function DOMTokenList(el) {
-				this._el = el;
-				el.$classList = this;
-				this._reinit();
-			};
-			$extend(DOMTokenList, {
-				_reinit: function() {
-					// Empty
-					this.length = 0;
+	'classList' in html || (W.DOMTokenList = (function(DOMTokenList) {
+		$extend(DOMTokenList, {
+			_reinit: function() {
+				// Empty
+				this.length = 0;
 
-					// Fill
-					var classes = this._el.className.trim();
-					classes = classes ? classes.split(/\s+/g) : [];
-					for ( var i=0, L=classes.length; i<L; i++ ) {
-						push.call(this, classes[i]);
-					}
-
-					return this;
-				},
-				set: function() {
-					this._el.className = join.call(this, ' ');
-				},
-				add: function(token) {
-					push.call(this, token);
-					this.set();
-				},
-				contains: function(token) {
-					return indexOf.call(this, token) !== -1;
-				},
-				item: function(index) {
-					return this[index] || null;
-				},
-				remove: function(token) {
-					var i = indexOf.call(this, token);
-					if ( i != -1 ) {
-						splice.call(this, i, 1);
-						this.set();
-					}
-				},
-				toggle: function(token) {
-					if (!this.contains(token)) {
-						this.add(token);
-					}
-					else {
-						this.remove(token);
-					}
+				// Fill
+				var classes = this._el.className.trim();
+				classes = classes ? classes.split(/\s+/g) : [];
+				for ( var i=0, L=classes.length; i<L; i++ ) {
+					push.call(this, classes[i]);
 				}
-			});
 
-			W.DOMTokenList = DOMTokenList;
+				return this;
+			},
+			set: function() {
+				this._el.className = join.call(this, ' ');
+			},
+			add: function(token) {
+				push.call(this, token);
+				this.set();
+			},
+			contains: function(token) {
+				return indexOf.call(this, token) !== -1;
+			},
+			item: function(index) {
+				return this[index] || null;
+			},
+			remove: function(token) {
+				var i = indexOf.call(this, token);
+				if ( i != -1 ) {
+					splice.call(this, i, 1);
+					this.set();
+				}
+			},
+			toggle: function(token) {
+				if ( this.contains(token) ) {
+					return !!this.remove(token);
+				}
 
-			$getter(Element, 'classList', function() {
-				return this.$classList ? this.$classList._reinit() : new DOMTokenList(this);
-			});
-		})();
-	}
+				return !this.add(token);
+			}
+		});
+
+		$getter(Element, 'classList', function() {
+			return this.$classList ? this.$classList._reinit() : new DOMTokenList(this);
+		});
+
+		return DOMTokenList;
+	})(function(el) {
+		this._el = el;
+		el.$classList = this;
+		this._reinit();
+	}));
 	/* _classlist> */
 
 	/* <elements */
-	function Elements(source) {
+	function Elements(source, selector) {
 		this.length = 0;
 		source && $each(source, function(el, i) {
-			el.nodeType === 1 && this.push(el);
+			el.nodeType === 1 && ( !selector || el.is(selector) ) && this.push(el);
 		}, this);
 	}
 	$extend(Elements, {
@@ -706,8 +697,8 @@
 		/* _element_contains> */
 
 		/* <element_children */
-		getChildren: function() {
-			return new Elements(this.children || this.childNodes);
+		getChildren: function(selector) {
+			return new Elements(this.children || this.childNodes, selector);
 		},
 		/* element_children> */
 
@@ -833,6 +824,9 @@
 		},
 		replaceClass: function(before, after) {
 			return this.removeClass(before).addClass(after);
+		},
+		hasClass: function(token) {
+			return this.classList.contains(token);
 		},
 		/* element_class> */
 
