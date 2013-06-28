@@ -245,8 +245,14 @@
 				if ( retEl instanceof Element ) isElements = true;
 			});
 			return returnSelf ? this : ( isElements || !res.length ? new Elements(res) : res );
-		}
+		},
 		/* elements_invoke> */
+		filter: function(filter) {
+			if ( typeof filter == 'function' ) {
+				return new Elements([].filter.call(this, filter));
+			}
+			return new Elements(this, filter);
+		}
 	}, new Array);
 	/* elements> */
 
@@ -372,15 +378,17 @@
 		},
 		/* anyevent_summary> */
 
-		preventDefault: function() {
-			var e = this.originalEvent;
-			e.preventDefault && e.preventDefault();
-			e.returnValue = false;
+		preventDefault: function(e) {
+			if ( e = this.originalEvent ) {
+				e.preventDefault && e.preventDefault();
+				e.returnValue = false;
+			}
 		},
-		stopPropagation: function() {
-			var e = this.originalEvent;
-			e.stopPropagation && e.stopPropagation();
-			e.cancelBubble = true;
+		stopPropagation: function(e) {
+			if ( e = this.originalEvent ) {
+				e.stopPropagation && e.stopPropagation();
+				e.cancelBubble = true;
+			}
 		},
 
 		/* <anyevent_subject */
@@ -506,7 +514,7 @@
 				customEvent.type && (baseType = customEvent.type);
 			}
 
-			function onCallback(e) {
+			function onCallback(e, arg2) {
 				e && !(e instanceof AnyEvent) && (e = new AnyEvent(e));
 
 				// Find event subject
@@ -519,13 +527,13 @@
 
 				// Custom event type filter
 				if ( customEvent && customEvent.filter ) {
-					if ( !customEvent.filter.call(subject, e) ) {
+					if ( !customEvent.filter.call(subject, e, arg2) ) {
 						return;
 					}
 				}
 
 				e.subject || e.setSubject(subject);
-				return callback.call(subject, e);
+				return callback.call(subject, e, arg2);
 			}
 
 			if ( customEvent && customEvent.before ) {
@@ -561,12 +569,12 @@
 		/* eventable_off> */
 
 		/* <eventable_fire */
-		fire: function(eventType, e) {
+		fire: function(eventType, e, arg2) {
 			var events = this.$cache('events');
 			if ( events[eventType] ) {
 				e || (e = new AnyEvent(eventType));
 				$each(events[eventType], function(listener) {
-					listener.callback.call(this, e);
+					listener.callback.call(this, e, arg2);
 				}, this);
 			}
 			return this;
@@ -574,13 +582,13 @@
 		/* eventable_fire> */
 
 		/* <eventable_globalfire */
-		globalFire: function(globalType, localType, originalEvent) {
+		globalFire: function(globalType, localType, originalEvent, arg2) {
 			var e = originalEvent ? originalEvent : new AnyEvent(localType),
 				eventType = (globalType + '-' + localType).camel();
 			e.target = e.subject = this;
 			e.type = localType;
 			e.globalType = globalType;
-			W.fire(eventType, e);
+			W.fire(eventType, e, arg2);
 			return this;
 		}
 		/* eventable_globalfire> */
@@ -1021,14 +1029,21 @@
 			if ( this.readyState == 4 ) {
 				var success = this.status == 200,
 					eventType = success ? 'success' : 'error';
+
+				try {
+					this.responseJSON = JSON.parse(this.responseText);
+				}
+				catch (ex) {}
+				var response = this.responseJSON || this.responseXML || this.responseText;
+
 				// Specific events
-				this.fire(eventType, e);
-				this.fire('done', e);
+				this.fire(eventType, e, response);
+				this.fire('done', e, response);
 
 				/* <xhr_global */
 				// Global events
-				this.globalFire('xhr', eventType, e);
-				this.globalFire('xhr', 'done', e);
+				this.globalFire('xhr', eventType, e, response);
+				this.globalFire('xhr', 'done', e, response);
 				/* xhr_global> */
 			}
 		});
