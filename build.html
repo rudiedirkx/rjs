@@ -76,7 +76,7 @@ function createTable(deps) {
 	});
 
 	ul.on('change', 'input[type=checkbox]', function(e) {
-		cbColor(cb);
+		cbColor(this);
 		build(true);
 	});
 
