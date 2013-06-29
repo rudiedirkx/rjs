@@ -2,8 +2,6 @@
 /**
  * Todo:
  * - Asset loading (JS, CSS)
- * - Element.formValues()?
- * - Serialize {} to query
  */
 
 (function(W, D) {
@@ -55,6 +53,24 @@
 		return window[type] && obj instanceof window[type];
 	}
 
+	/* <serialize */
+	function $serialize(o, prefix) {
+		var q = [];
+		$each(o, function(v, k) {
+			var name = prefix ? prefix + '[' + k + ']' : k,
+			v = o[k];
+			if ( typeof v == 'object' ) {
+				q.push($serialize(v, name));
+			}
+			else {
+				q.push(name + '=' + encodeURIComponent(v));
+			}
+		});
+		return q.join('&');
+	}
+	/* serialize> */
+
+
 	function $each(source, callback, context) {
 		if ( $arrayish(source) ) {
 			for ( var i=0, L=source.length; i<L; i++ ) {
@@ -103,6 +119,16 @@
 	/* getter> */
 
 	$extend(Array, {
+		/* <array_invoke */
+		invoke: function(method, args) {
+			var results = [];
+			this.forEach(function(el) {
+				results.push( el[method].apply(el, args) );
+			});
+			return results;
+		},
+		/* array_invoke> */
+
 		/* <array_contains */
 		contains: function(obj) {
 			return this.indexOf(obj) != -1;
@@ -112,7 +138,7 @@
 		/* <array_unique */
 		unique: function() {
 			var els = [];
-			$each(this, function(el) {
+			this.forEach(function(el) {
 				els.contains(el) || els.push(el);
 			});
 			return els;
@@ -120,9 +146,7 @@
 		/* array_unique> */
 
 		/* <array_each */
-		each: function(callback, context) {
-			return $each(this, callback, context);
-		},
+		each: Array.prototype.forEach,
 		/* array_each> */
 
 		/* <array_firstlast */
@@ -135,7 +159,7 @@
 		/* array_firstlast> */
 	});
 	/* <array_defaultfilter */
-	Array.defaultFilterCallback = function(item, i, list) {
+	Array.defaultFilterCallback = function(item) {
 		return !!item;
 	};
 	/* array_defaultfilter> */
@@ -690,6 +714,41 @@
 		},
 		/* element_is> */
 
+		/* <element_value */
+		getValue: function() {
+			if ( !this.disabled ) {
+				if ( this.nodeName == 'SELECT' && this.multiple ) {
+					return [].filter.call(this.options, function(option) {
+						return option.selected;
+					});
+				}
+				else if ( this.type == 'radio' || this.type == 'checkbox' && !this.checked ) {
+					return;
+				}
+				return this.value;
+			}
+		},
+		/* element_value> */
+
+		/* <element_toquerystring */
+		toQueryString: function() {
+			var els = this.getElements('input[name], select[name], textarea[name]'),
+				query = [];
+			els.forEach(function(el) {
+				var value = el.getValue();
+				if ( value instanceof Array ) {
+					value.forEach(function(val) {
+						query.push(el.name + '=' + encodeURIComponent(val));
+					});
+				}
+				else if ( value != null ) {
+					query.push(el.name + '=' + encodeURIComponent(value));
+				}
+			});
+			return query.join('&');
+		},
+		/* element_toquerystring> */
+
 		/* <element_ancestor */
 		selfOrFirstAncestor: function(selector) {
 			return this.is(selector) ? this : this.firstAncestor(selector);
@@ -1087,9 +1146,10 @@
 	/* <class */
 	W.$class = $class;
 	/* class> */
-	/* <is_a */
 	W.$is_a = $is_a;
-	/* is_a> */
+	/* <serialize */
+	W.$serialize = $serialize;
+	/* serialize> */
 	W.$each = $each;
 	W.$extend = $extend;
 	/* <getter */

@@ -2,9 +2,10 @@
 	ifsetor: [],
 	array: [],
 	class: [],
-	is_a: [],
+	serialize: [],
 	getter: [],
 
+	array_invoke: [],
 	array_contains: [],
 	array_unique: [],
 	array_each: [],
@@ -30,7 +31,7 @@
 	anyevent: ['_date_now'],
 	anyevent_touches: ['anyevent', 'array'],
 	anyevent_pagexy: ['anyevent', 'coords2d', 'coords2d_add'],
-	anyevent_summary: ['anyevent', 'coords2d', 'is_a', 'class'],
+	anyevent_summary: ['anyevent', 'coords2d', 'class'],
 	anyevent_subject: ['anyevent', 'anyevent_pagexy', 'coords2d_subtract', 'element_position'],
 
 	event_keys: [],
@@ -66,6 +67,8 @@
 	element_attr2method_text: ['element_attr2method', 'element_text'],
 
 	element_is: ['elements', 'array_contains'],
+	element_value: [],
+	element_toquerystring: ['elements'],
 	_element_contains: ['elements', 'array_contains'],
 	element_children: ['elements'],
 	element_firstlast: ['element_children', 'array_firstlast'],
@@ -88,6 +91,6 @@
 
 	domready: ['events'],
 
-	xhr: ['eventable', 'eventable_fire', 'is_a', 'ifsetor'],
+	xhr: ['eventable', 'eventable_fire', 'ifsetor'],
 	xhr_global: ['xhr', 'eventable_globalfire']
 }
