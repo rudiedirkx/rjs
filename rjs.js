@@ -460,9 +460,9 @@
 		directchange: {
 			type: 'keyup',
 			filter: function(e) {
-				var lastValue = this.__lastDCValue == null ? this.defaultValue : this.__lastDCValue,
+				var lastValue = this._dc == null ? this.defaultValue : this._dc,
 					currentValue = this.value;
-				this.__lastDCValue = currentValue;
+				this._dc = currentValue;
 				return lastValue == null || lastValue != currentValue;
 			}
 		}
@@ -920,13 +920,6 @@
 			return this;
 		},
 		/* element_append> */
-
-		/* <element_hover */
-		hover: function(matches, over, out) {
-			matches || (out = over) && (over = matches) && (matches = null);
-			return this.on('mouseenter', over).on('mouseleave', out);
-		},
-		/* element_hover> */
 
 		/* <element_style */
 		getStyle: function(property) {

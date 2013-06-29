@@ -79,7 +79,6 @@
 	element_class: ['_classlist'],
 	element_inject: ['element_insertafter'],
 	element_append: [],
-	element_hover: ['_event_custom_mouseenter', '_event_custom_mouseleave'],
 	element_style: [],
 	element_css: ['element_style'],
 	element_show: ['element_css'],
