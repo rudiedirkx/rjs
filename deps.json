@@ -29,6 +29,7 @@
 	coords2d_equal: ['coords2d', 'coords2d_join'],
 
 	anyevent: ['_date_now'],
+	anyevent_lmrclick: ['anyevent'],
 	anyevent_touches: ['anyevent', 'array'],
 	anyevent_pagexy: ['anyevent', 'coords2d', 'coords2d_add'],
 	anyevent_summary: ['anyevent', 'coords2d', 'class'],

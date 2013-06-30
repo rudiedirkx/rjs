@@ -344,10 +344,12 @@
 		this.ctrl = e.ctrlKey;
 		this.shift = e.shiftKey;
 		this.button = e.button || e.which;
+		/* <anyevent_lmrclick */
 		this.leftClick = this.button == 1;
 		this.rightClick = this.button == 2;
 		this.middleClick = this.button == 4 || this.button == 1 && this.key == 2;
 		this.leftClick = this.leftClick && !this.middleClick;
+		/* anyevent_lmrclick> */
 		this.which = this.key || this.button;
 		this.detail = e.detail;
 
@@ -357,7 +359,7 @@
 		this.clientY = e.clientY;
 
 		/* <anyevent_touches */
-		this.touches = e.touches;
+		this.touches = e.touches ? $array(e.touches) : null;
 
 		if ( this.touches && this.touches[0] ) {
 			this.pageX = this.touches[0].pageX;
