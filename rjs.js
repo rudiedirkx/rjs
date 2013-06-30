@@ -404,14 +404,14 @@
 
 		preventDefault: function(e) {
 			if ( e = this.originalEvent ) {
-				e.preventDefault && e.preventDefault();
-				e.returnValue = false;
+				e.preventDefault();
+				this.defaultPrevented = true;
 			}
 		},
 		stopPropagation: function(e) {
 			if ( e = this.originalEvent ) {
-				e.stopPropagation && e.stopPropagation();
-				e.cancelBubble = true;
+				e.stopPropagation();
+				this.propagationStopped = true;
 			}
 		},
 
