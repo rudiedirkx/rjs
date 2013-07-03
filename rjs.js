@@ -1082,13 +1082,14 @@
 		xhr.on('readystatechange', function(e) {
 			if ( this.readyState == 4 ) {
 				var success = this.status == 200,
-					eventType = success ? 'success' : 'error';
+					eventType = success ? 'success' : 'error',
+					t = this.responseText;
 
 				try {
-					this.responseJSON = JSON.parse(this.responseText);
+					this.responseJSON = (t[0] == '[' || t[0] == '{') && JSON.parse(t);
 				}
 				catch (ex) {}
-				var response = this.responseJSON || this.responseXML || this.responseText;
+				var response = this.responseJSON || this.responseXML || t;
 
 				// Specific events
 				this.fire(eventType, e, response);
@@ -1108,6 +1109,7 @@
 			}
 		}
 		if ( options.send ) {
+			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 			/* <xhr_global */
 			xhr.globalFire('xhr', 'start');
 			/* xhr_global> */
