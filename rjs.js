@@ -626,7 +626,7 @@
 	W.XMLHttpRequestUpload && $extend([XMLHttpRequestUpload], Eventable.prototype);
 	/* native_eventable> */
 
-	$extend([Element, Text], {
+	$extend(Node, {
 		/* <element_ancestor */
 		firstAncestor: function(selector) {
 			var el = this;
@@ -680,8 +680,14 @@
 				return this.insertBefore(el, next);
 			}
 			return this.appendChild(el);
-		}
+		},
 		/* element_insertafter> */
+
+		/* <element_index */
+		nodeIndex: function() {
+			return indexOf.call(this.parentNode.childNodes, this);
+		}
+		/* element_index> */
 	});
 
 	/* <document_el */
@@ -980,6 +986,12 @@
 			return this;
 		},
 		/* element_empty> */
+
+		/* <element_index */
+		elementIndex: function() {
+			return this.parentNode.getChildren().indexOf(this);
+		},
+		/* element_index> */
 
 		/* <element_position */
 		getPosition: function() {

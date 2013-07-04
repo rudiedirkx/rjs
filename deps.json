@@ -60,6 +60,7 @@
 	element_remove: [],
 	element_parent: [],
 	element_insertafter: [],
+	element_index: ['element_children'],
 
 	document_el: ['element_attr'],
 
