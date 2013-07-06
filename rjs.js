@@ -376,7 +376,7 @@
 		}
 		/* anyevent_pagexy> */
 
-		this.data = e.clipboardData;
+		this.data = e.dataTransfer || e.clipboardData;
 		this.time = e.timeStamp || e.timestamp || e.time || Date.now();
 
 		this.total = e.total || e.totalSize;
@@ -498,19 +498,6 @@
 		this.time = Date.now();
 	}
 	$extend(Eventable, {
-		/* <eventable_cache */
-		"$cache": function(name, value, defaultValue) {
-			this.$$cache || (this.$$cache = {});
-			this.$$cache[name] || (this.$$cache[name] = defaultValue || {});
-
-			if ( value != null ) {
-				this.$$cache[name] = value;
-			}
-
-			return this.$$cache[name];
-		},
-		/* eventable_cache> */
-
 		/* <eventable_listen */
 		_addEventListener: function(eventType, callback) {
 			if ( this.addEventListener ) {
@@ -568,7 +555,7 @@
 				}
 			}
 
-			var events = this.$cache('events');
+			var events = this.$events || (this.$events = {});
 			events[eventType] || (events[eventType] = []);
 			events[eventType].push({type: baseType, original: callback, callback: onCallback});
 
@@ -578,17 +565,17 @@
 
 		/* <eventable_off */
 		off: function(eventType, callback) {
-			var events = this.$cache('events');
-			if ( events[eventType] ) {
-				var changed = false;
-				$each(events[eventType], function(listener, i) {
+			if ( this.$events && this.$events[eventType] ) {
+				var events = this.$events[eventType],
+					changed = false;
+				$each(events, function(listener, i) {
 					if ( !callback || callback == listener.original ) {
 						changed = true;
-						delete events[eventType][i];
+						delete events[i];
 						this._removeEventListener(listener.type, listener.callback);
 					}
 				}, this);
-				changed && (events[eventType] = events[eventType].filter(Array.defaultFilterCallback));
+				changed && (this.$events[eventType] = events.filter(Array.defaultFilterCallback));
 			}
 			return this;
 		},
@@ -596,10 +583,9 @@
 
 		/* <eventable_fire */
 		fire: function(eventType, e, arg2) {
-			var events = this.$cache('events');
-			if ( events[eventType] ) {
+			if ( this.$events && this.$events[eventType] ) {
 				e || (e = new AnyEvent(eventType));
-				$each(events[eventType], function(listener) {
+				$each(this.$events[eventType], function(listener) {
 					listener.callback.call(this, e, arg2);
 				}, this);
 			}

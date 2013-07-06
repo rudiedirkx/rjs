@@ -45,12 +45,11 @@
 	native_extend_elements: ['native_extend', 'elements'],
 
 	eventable: ['_date_now', 'anyevent', 'eventable_on'],
-	eventable_cache: [],
 	eventable_listen: [],
 	eventable_unlisten: [],
-	eventable_on: ['eventable_cache', 'eventable_listen', 'anyevent', 'element_ancestor'],
-	eventable_off: ['eventable_cache', 'eventable_unlisten'],
-	eventable_fire: ['anyevent', 'eventable_cache'],
+	eventable_on: ['eventable_listen', 'anyevent', 'element_ancestor'],
+	eventable_off: ['eventable_unlisten'],
+	eventable_fire: ['anyevent'],
 	eventable_globalfire: ['anyevent', 'eventable_fire'],
 
 	native_eventable: ['eventable'],
