@@ -498,27 +498,10 @@
 		this.time = Date.now();
 	}
 	$extend(Eventable, {
-		/* <eventable_listen */
-		_addEventListener: function(eventType, callback) {
-			if ( this.addEventListener ) {
-				this.addEventListener(eventType, callback);
-			}
-			return this;
-		},
-		/* eventable_listen> */
-
-		/* <eventable_unlisten */
-		_removeEventListener: function(eventType, callback) {
-			if ( this.removeEventListener ) {
-				this.removeEventListener(eventType, callback);
-			}
-			return this;
-		},
-		/* eventable_unlisten> */
-
 		/* <eventable_on */
 		on: function(eventType, matches, callback) {
 			callback || (callback = matches) && (matches = null);
+			var bubbles = !!matches;
 
 			var baseType = eventType,
 				customEvent = false;
@@ -557,9 +540,10 @@
 
 			var events = this.$events || (this.$events = {});
 			events[eventType] || (events[eventType] = []);
-			events[eventType].push({type: baseType, original: callback, callback: onCallback});
+			events[eventType].push({type: baseType, original: callback, callback: onCallback, bubbles: bubbles});
 
-			return this._addEventListener(baseType, onCallback);
+			this.addEventListener(baseType, onCallback, bubbles);
+			return this;
 		},
 		/* eventable_on> */
 
@@ -572,7 +556,7 @@
 					if ( !callback || callback == listener.original ) {
 						changed = true;
 						delete events[i];
-						this._removeEventListener(listener.type, listener.callback);
+						this.removeEventListener(listener.type, listener.callback, listener.bubbles);
 					}
 				}, this);
 				changed && (this.$events[eventType] = events.filter(Array.defaultFilterCallback));
