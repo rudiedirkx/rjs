@@ -253,6 +253,13 @@ $$('[title]').on('mouseenter', function(e) {
 	return this.attr('title');
 }).attr('title', null);
 
+// Load another script
+$.js('https://platform.twitter.com/widgets.js').on('load', function(e) {
+	console.log('load <SCRIPT>', this, e);
+}).on('error', function(e) {
+	console.log('error <SCRIPT>', this, e);
+});
+
 // Timeout to ensure visually all script ran
 setTimeout(function() {
 	document.el('p', {text: 'It seems to work...'}).css({

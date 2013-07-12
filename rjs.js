@@ -1,9 +1,4 @@
 
-/**
- * Todo:
- * - Asset loading (JS, CSS)
- */
-
 (function(W, D) {
 
 	"use strict";
@@ -248,6 +243,12 @@
 		});
 	}
 	/* _classlist> */
+
+	/* <asset_js */
+	function $loadJS(src) {
+		return document.el('script', {src: src, type: 'text/javascript'}).inject(head);
+	}
+	/* asset_js> */
 
 	/* <elements */
 	function Elements(source, selector) {
@@ -542,7 +543,7 @@
 			events[eventType] || (events[eventType] = []);
 			events[eventType].push({type: baseType, original: callback, callback: onCallback, bubbles: bubbles});
 
-			this.addEventListener(baseType, onCallback, bubbles);
+			this.addEventListener && this.addEventListener(baseType, onCallback, bubbles);
 			return this;
 		},
 		/* eventable_on> */
@@ -556,7 +557,7 @@
 					if ( !callback || callback == listener.original ) {
 						changed = true;
 						delete events[i];
-						this.removeEventListener(listener.type, listener.callback, listener.bubbles);
+						this.removeEventListener && this.removeEventListener(listener.type, listener.callback, listener.bubbles);
 					}
 				}, this);
 				changed && (this.$events[eventType] = events.filter(Array.defaultFilterCallback));
@@ -1159,6 +1160,10 @@
 	W.$.get = shortXHR('get');
 	W.$.post = shortXHR('post');
 	/* xhr> */
+
+	/* <asset_js */
+	W.$.js = $loadJS;
+	/* asset_js> */
 
 	// } catch (ex) { alert(ex); }
 

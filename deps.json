@@ -18,6 +18,8 @@
 
 	_classlist: ['getter'],
 
+	asset_js: ['document_el', 'element_inject'],
+
 	elements: [],
 	elements_invoke: ['elements'],
 
