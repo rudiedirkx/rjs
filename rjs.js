@@ -70,6 +70,23 @@
 	}
 	/* serialize> */
 
+	/* <copy */
+	function $copy(obj) {
+		return JSON.parse(JSON.stringify(obj));
+	}
+	/* copy> */
+
+	/* <merge */
+	function $merge(base) {
+		for ( var i=1, L=arguments.length; i<L; i++ ) {
+			$each(arguments[i], function(value, name) {
+				base[name] = value;
+			});
+		}
+		return base;
+	}
+	/* merge> */
+
 
 	function $each(source, callback, context) {
 		if ( $arrayish(source) ) {
@@ -1059,12 +1076,13 @@
 
 	/* <xhr */
 	function XHR(url, options) {
-		options || (options = {});
-		options.method = (options.method ? options.method : 'GET').toUpperCase();
-		options.async != null || (options.async = true);
-		options.send != null || (options.send = true);
-		options.data != null || (options.data = null);
-		options.url = url;
+		options = $merge({}, {
+			method: 'GET',
+			async: true,
+			send: true,
+			data: null,
+			url: url
+		}, options || {});
 
 		var xhr = new XMLHttpRequest;
 		xhr.open(options.method, options.url, options.async, options.username, options.password);
@@ -1137,6 +1155,12 @@
 	/* <serialize */
 	W.$serialize = $serialize;
 	/* serialize> */
+	/* <copy */
+	W.$copy = $copy;
+	/* copy> */
+	/* <merge */
+	W.$merge = $merge;
+	/* merge> */
 	W.$each = $each;
 	W.$extend = $extend;
 	/* <getter */

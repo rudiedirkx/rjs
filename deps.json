@@ -5,6 +5,8 @@
 	array: [],
 	class: [],
 	serialize: [],
+	copy: [],
+	merge: [],
 	getter: [],
 
 	array_invoke: [],
@@ -95,6 +97,6 @@
 
 	domready: ['events'],
 
-	xhr: ['eventable', 'eventable_fire', 'ifsetor'],
+	xhr: ['eventable', 'eventable_fire', 'merge'],
 	xhr_global: ['xhr', 'eventable_globalfire']
 }

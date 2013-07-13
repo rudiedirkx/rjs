@@ -42,7 +42,7 @@ pre {
 <script>
 "use strict";
 
-var deps, $button, $save, source, waiting = 2;
+var deps, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
 var defState = '-string_camel,-anyevent_summary,+_event_custom_mousenterleave,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text';
 
 function setSize(length) {
@@ -69,15 +69,30 @@ function build(size) {
 	return code;
 }
 
+function upDeps(cb) {
+	var polyf = cb.name[0] == '_',
+		deps = depsMap[ cb.checked ? 'enable' : 'disable' ][ cb.name ];
+	polyf || deps.forEach(function(name) {
+		var polyf = name[0] == '_';
+		if ( !polyf ) {
+			var depCb = $('cb-' + name);
+			depCb.checked = cb.checked;
+			cbColor(depCb);
+			upDeps(depCb);
+		}
+	});
+}
+
 function createTable(deps) {
 	var ul = document.el('ul');
 	$each(deps, function(x, name) {
 		var check = name[0] == '_' ? '' : 'checked';
-		document.el('li').setHTML('<label class="' + check + '"><input type=checkbox name="' + name + '" ' + check + ' disabled> ' + name + '</label>').inject(ul);
+		document.el('li').setHTML('<label class="' + check + '" title="Requires: \n- ' + depsMap.enable[name].join('\n- ') + '\n\nRequired by: \n- ' + depsMap.disable[name].join('\n- ') + '"><input type=checkbox id="cb-' + name + '" name="' + name + '" ' + check + ' disabled> ' + name + '</label>').inject(ul);
 	});
 
 	ul.on('change', 'input[type=checkbox]', function(e) {
 		cbColor(this);
+		upDeps(this);
 		build(true);
 	});
 
@@ -101,6 +116,17 @@ function reinState() {
 	});
 }
 
+function createDepsMap(deps) {
+	$each(deps, function(requires, name) {
+		depsMap.enable[name] = requires;
+		depsMap.disable[name] || (depsMap.disable[name] = []);
+		$each(requires, function(requirement) {
+			depsMap.disable[requirement] || (depsMap.disable[requirement] = []);
+			depsMap.disable[requirement].push(name);
+		});
+	});
+}
+
 function ready() {
 	$$('[disabled]').attr('disabled', null);
 	build(true);
@@ -112,6 +138,8 @@ function init() {
 
 	$.get('deps.json').on('success', function(e) {
 		deps = JSON.parse(this.responseText.validJSON());
+
+		createDepsMap(deps);
 
 		createTable(deps).injectTop(document.body);
 		reinState();
