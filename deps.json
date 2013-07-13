@@ -1,4 +1,6 @@
 {
+	json_alias: [],
+
 	ifsetor: [],
 	array: [],
 	class: [],

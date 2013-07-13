@@ -8,6 +8,11 @@
 	var html = D.documentElement,
 		head = html.getElementsByTagName('head')[0];
 
+	/* <json_alias */
+	JSON.encode = JSON.stringify;
+	JSON.decode = JSON.parse;
+	/* json_alias> */
+
 	/* <domready */
 	var domReadyAttached = false,
 		domIsReady = false;
@@ -146,10 +151,10 @@
 
 		/* <array_firstlast */
 		first: function() {
-			return this[0] || null;
+			return this[0];
 		},
 		last: function() {
-			return this[this.length-1] || null;
+			return this[this.length-1];
 		}
 		/* array_firstlast> */
 	});
@@ -671,6 +676,7 @@
 	});
 	/* document_el> */
 
+	/* <element_attr2method */
 	Element.attr2method = {
 		/* <element_attr2method_html */
 		html: function(value) {
@@ -684,6 +690,7 @@
 		}
 		/* element_attr2method_text> */
 	};
+	/* element_attr2method> */
 
 	var EP = Element.prototype;
 	$extend(Element, {
