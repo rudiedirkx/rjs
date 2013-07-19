@@ -526,7 +526,11 @@
 		/* <eventable_on */
 		on: function(eventType, matches, callback) {
 			callback || (callback = matches) && (matches = null);
-			var bubbles = !!matches;
+
+			var options = {
+				bubbles: !!matches,
+				subject: this
+			};
 
 			var baseType = eventType,
 				customEvent = false;
@@ -539,7 +543,7 @@
 				e && !(e instanceof AnyEvent) && (e = new AnyEvent(e));
 
 				// Find event subject
-				var subject = this;
+				var subject = options.subject;
 				if ( e && e.target && matches ) {
 					if ( !(subject = e.target.selfOrFirstAncestor(matches)) ) {
 						return;
@@ -558,16 +562,16 @@
 			}
 
 			if ( customEvent && customEvent.before ) {
-				if ( customEvent.before.call(this) === false ) {
-					return;
+				if ( customEvent.before.call(this, options) === false ) {
+					return this;
 				}
 			}
 
-			var events = this.$events || (this.$events = {});
+			var events = options.subject.$events || (options.subject.$events = {});
 			events[eventType] || (events[eventType] = []);
-			events[eventType].push({type: baseType, original: callback, callback: onCallback, bubbles: bubbles});
+			events[eventType].push({type: baseType, original: callback, callback: onCallback, bubbles: options.bubbles});
 
-			this.addEventListener && this.addEventListener(baseType, onCallback, bubbles);
+			options.subject.addEventListener && options.subject.addEventListener(baseType, onCallback, options.bubbles);
 			return this;
 		},
 		/* eventable_on> */
@@ -1072,7 +1076,8 @@
 			async: true,
 			send: true,
 			data: null,
-			url: url
+			url: url,
+			requester: 'XMLHttpRequest'
 		}, options || {});
 
 		var xhr = new XMLHttpRequest;
@@ -1108,15 +1113,25 @@
 			}
 		}
 		if ( options.send ) {
-			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			options.requester && xhr.setRequestHeader('X-Requested-With', options.requester);
+
 			/* <xhr_global */
 			xhr.globalFire('xhr', 'start');
 			/* xhr_global> */
 			xhr.fire('start');
-			xhr.send(options.data);
+
+			options.async ? setTimeout(function() { xhr.send(options.data); }, 1) : xhr.send(options.data);
 		}
 		return xhr;
 	}
+
+	Event.Custom.progress = {
+		before: function(options) {
+			if ( this instanceof XMLHttpRequest && this.upload ) {
+				options.subject = this.upload;
+			}
+		}
+	};
 
 	function shortXHR(method) {
 		return function(url, data, options) {
