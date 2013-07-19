@@ -1079,6 +1079,7 @@
 			url: url,
 			requester: 'XMLHttpRequest'
 		}, options || {});
+		options.method = options.method.toUpperCase();
 
 		var xhr = new XMLHttpRequest;
 		xhr.open(options.method, options.url, options.async, options.username, options.password);
