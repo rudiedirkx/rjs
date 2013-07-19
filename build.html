@@ -18,6 +18,7 @@ label {
 	display: inline-block;
 	padding: 1px 1px;
 	background: #faa;
+	white-space: nowrap;
 }
 .checked {
 	background: #afa;
@@ -43,7 +44,7 @@ pre {
 "use strict";
 
 var deps, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
-var defState = '-string_camel,-anyevent_summary,+_event_custom_mousenterleave,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text';
+var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text';
 
 function setSize(length) {
 	$button
@@ -70,24 +71,19 @@ function build(size) {
 }
 
 function upDeps(cb) {
-	var polyf = cb.name[0] == '_',
-		deps = depsMap[ cb.checked ? 'enable' : 'disable' ][ cb.name ];
-	polyf || deps.forEach(function(name) {
-		var polyf = name[0] == '_';
-		if ( !polyf ) {
-			var depCb = $('cb-' + name);
-			depCb.checked = cb.checked;
-			cbColor(depCb);
-			upDeps(depCb);
-		}
+	var deps = depsMap[ cb.checked ? 'enable' : 'disable' ][ cb.name ];
+	deps.forEach(function(name) {
+		var depCb = $('cb-' + name);
+		depCb.checked = cb.checked;
+		cbColor(depCb);
+		upDeps(depCb);
 	});
 }
 
 function createTable(deps) {
 	var ul = document.el('ul');
 	$each(deps, function(x, name) {
-		var check = name[0] == '_' ? '' : 'checked';
-		document.el('li').setHTML('<label class="' + check + '" title="Requires: \n- ' + depsMap.enable[name].join('\n- ') + '\n\nRequired by: \n- ' + depsMap.disable[name].join('\n- ') + '"><input type=checkbox id="cb-' + name + '" name="' + name + '" ' + check + ' disabled> ' + name + '</label>').inject(ul);
+		document.el('li').setHTML('<label class="checked" title="Requires: \n- ' + depsMap.enable[name].join('\n- ') + '\n\nRequired by: \n- ' + depsMap.disable[name].join('\n- ') + '"><input type=checkbox id="cb-' + name + '" name="' + name + '" checked disabled> ' + name + '</label>').inject(ul);
 	});
 
 	ul.on('change', 'input[type=checkbox]', function(e) {

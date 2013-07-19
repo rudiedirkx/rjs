@@ -48,15 +48,12 @@
 	event_custom_directchange: ['event_custom'],
 
 	native_extend: [],
-	native_extend_elements: ['native_extend', 'elements'],
 
-	eventable: ['_date_now', 'anyevent', 'eventable_on'],
-	eventable_listen: [],
-	eventable_unlisten: [],
-	eventable_on: ['eventable_listen', 'anyevent', 'element_ancestor'],
-	eventable_off: ['eventable_unlisten'],
-	eventable_fire: ['anyevent'],
-	eventable_globalfire: ['anyevent', 'eventable_fire'],
+	eventable: ['_date_now', 'anyevent'],
+	eventable_on: ['eventable', 'anyevent', 'element_ancestor'],
+	eventable_off: ['eventable'],
+	eventable_fire: ['eventable', 'anyevent'],
+	eventable_globalfire: ['eventable', 'anyevent', 'eventable_fire', 'string_camel'],
 
 	native_eventable: ['eventable'],
 

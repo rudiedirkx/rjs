@@ -120,11 +120,13 @@
 			$each(proto, function(fn, name) {
 				methodOwner[name] = fn;
 
+				/* <elements_invoke */
 				if ( Host == Element && !Elements.prototype[name] ) {
 					Elements.prototype[name] = function() {
 						return this.invoke(name, arguments);
 					};
 				}
+				/* elements_invoke> */
 			});
 		});
 	}
@@ -505,9 +507,9 @@
 		window, 
 		document, 
 		Element,
-		/* <native_extend_elements */
+		/* <elements */
 		Elements
-		/* native_extend_elements> */
+		/* elements> */
 	], function(Host) {
 		Host.extend = function(methods) {
 			$extend([this], methods);
@@ -759,7 +761,7 @@
 		/* element_ancestor> */
 
 		/* <_element_contains */
-		contains: function(child) {
+		contains: Element.prototype.contains || function(child) {
 			return this.getElements('*').contains(child);
 		},
 		/* _element_contains> */
@@ -1027,23 +1029,12 @@
 		}
 	};
 
-	function onDomReady() {
-		var rs = D.readyState;
-		if ( !domIsReady && (rs == 'complete' || rs == 'interactive') ) {
-			domIsReady = true;
-			D.fire('ready');
-		}
-	}
-
 	function attachDomReady() {
 		domReadyAttached = true;
 
-		if ( D.addEventListener ) {
-			D.addEventListener('DOMContentLoaded', onDomReady, false);
-		}
-		else if ( D.attachEvent ) {
-			D.attachEvent('onreadystatechange', onDomReady);
-		}
+		D.on('DOMContentLoaded', function(e) {
+			this.fire('ready');
+		});
 	}
 	/* domready> */
 
