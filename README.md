@@ -39,7 +39,7 @@ Extend element methods:
 
 	Element.extend({
 		zebra: function() {
-			return $each(this.getChildren(), function(child, i) {
+			return this.getChildren().each(function(child, i) {
 				var cn = i%2 == 0 ? 'odd' : 'even';
 				child.addClass(cn);
 			});
@@ -63,7 +63,7 @@ Handle propagated click event:
 		alert('Clicked on ' + img.nodeName + ': ' + e.subjectXY.x + ', ' + e.subjectXY.y);
 	});
 
-Create DOM elements and use them almost sensibly:
+Create DOM elements and use them immediately:
 
 	document.el('pre', {lang: 'javascript'}).addClass('debug').inject(document.body);
 
@@ -129,9 +129,10 @@ Ajax delete something:
 
 Extend HTML elements like this:
 
+	// el.toggle already exists, but you get the point
 	Element.extend({
 		toggle: function() {
-			return this.getStyle('display') == 'none' ? this.show() : this.css('display', 'none');
+			return this.getStyle('display') == 'none' ? this.show() : this.hide();
 		}
 	});
 	// This will now work for Element and Elements
@@ -142,7 +143,8 @@ Extend other classes like this:
 
 	$extend(AnyEvent, {
 		stop: function() {
-			return this.preventDefault && this.stopPropagation();
+			this.preventDefault();
+			this.stopPropagation();
 		}
 	});
 
@@ -168,7 +170,7 @@ Coordinates are now easy:
 		$('red-round-marker').css( C.subtract({x: 10, y: 10}).toCSS() ).show();
 	});
 
-And even easier if you need a reverse():
+And even easier. If you need a reverse():
 
 	$extend(Coords2D, {
 		multiply: function(factor) {
@@ -195,14 +197,21 @@ Use Event.Keys to remember (or not) key codes:
 Custom events (or hooks if you want):
 
 	Event.Custom.change = {
-		before: function() {
+		// See Event.Custom.ready.before and Event.Custom.progress.before for example
+		before: function(options) {
 			// Someone's attaching an onchange listener to `this`.
 			// We'll see about that:
-			return Math.random() > 0.5;
+			return Math.random() > 0.5; // false will stop adding the listener
 		},
+		// See Event.Custom.directchange.filter for example
 		filter: function(e) {
 			// Someone's triggered an onchange listener on `this`.
 			// We'll see about that:
-			return Math.random() > 0.5;
+			return Math.random() > 0.5; // false will stop calling attached listeners
 		}
 	};
+
+If you include Sortable, you have a very simple drag sortable:
+
+	// More examples in rjs.sortable.js
+	$('some-tbody').sortable(options).on('sortableEnd', onSortableEnd);
