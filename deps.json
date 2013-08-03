@@ -70,6 +70,7 @@
 	element_attr2method_html: ['element_attr2method', 'element_html'],
 	element_attr2method_text: ['element_attr2method', 'element_text'],
 
+	element_prop: [],
 	element_is: ['elements', 'array_contains'],
 	element_value: [],
 	element_toquerystring: ['elements'],

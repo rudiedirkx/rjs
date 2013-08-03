@@ -270,6 +270,22 @@
 
 	/* <asset_js */
 	function $loadJS(src) {
+		if ( $arrayish(src) ) {
+			var evt = new Eventable(src),
+				need = src.length,
+				have = 0,
+				onLoad = function(e) {
+					++have == need && evt.fire('load', e);
+				},
+				onError = function(e) {
+					evt.fire('error', e);
+				};
+			src.forEach(function(url) {
+				$loadJS(url).on('load', onLoad).on('error', onError);
+			});
+			return evt;
+		}
+
 		return document.el('script', {src: src, type: 'text/javascript'}).inject(head);
 	}
 	/* asset_js> */
@@ -717,6 +733,16 @@
 
 	var EP = Element.prototype;
 	$extend(Element, {
+		/* <element_prop */
+		prop: function(name, value) {
+			if ( value !== undefined ) {
+				this[name] = value;
+			}
+
+			return this[name];
+		},
+		/* element_prop> */
+
 		/* <element_is */
 		is: EP.matches || EP.webkitMatches || EP.mozMatches || EP.msMatches || EP.oMatches || EP.matchesSelector || EP.webkitMatchesSelector || EP.mozMatchesSelector || EP.msMatchesSelector || EP.oMatchesSelector || function(selector) {
 			return $$(selector).contains(this);
@@ -1077,7 +1103,8 @@
 			send: true,
 			data: null,
 			url: url,
-			requester: 'XMLHttpRequest'
+			requester: 'XMLHttpRequest',
+			execScripts: true
 		}, options || {});
 		options.method = options.method.toUpperCase();
 
@@ -1096,9 +1123,31 @@
 				catch (ex) {}
 				var response = this.responseJSON || this.responseXML || t;
 
+				// Collect <SCRIPT>s from probable HTML response
+				if ( this.options.execScripts ) {
+					var scripts = [];
+					if ( typeof response == 'string' ) {
+						var regex = /<script[^>]*>([\s\S]*?)<\/script>/i,
+							script;
+						while ( script = response.match(regex) ) {
+							response = response.replace(regex, '');
+							if ( script = script[1].trim() ) {
+								scripts.push(script);
+							}
+						}
+					}
+				}
+
 				// Specific events
 				this.fire(eventType, e, response);
 				this.fire('done', e, response);
+
+				// Execute collected <SCRIPT>s after specific callback, but before global
+				if ( this.options.execScripts && scripts.length ) {
+					scripts.forEach(function(code) {
+						eval(code);
+					});
+				}
 
 				/* <xhr_global */
 				// Global events

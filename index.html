@@ -254,11 +254,11 @@ $$('[title]').on('mouseenter', function(e) {
 }).attr('title', null);
 
 // Load another script
-$.js('https://platform.twitter.com/widgets.js').on('load', function(e) {
+console.log('loadJS', $.js(['https://platform.twitter.com/widgets.js', 'https://rawgithub.com/jashkenas/underscore/master/underscore.js']).on('load', function(e) {
 	console.log('load <SCRIPT>', this, e);
 }).on('error', function(e) {
 	console.log('error <SCRIPT>', this, e);
-});
+}));
 
 // Timeout to ensure visually all script ran
 setTimeout(function() {
