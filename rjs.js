@@ -879,6 +879,13 @@
 		},
 		/* element_data> */
 
+		/* <element_prop */
+		setProp: function(name, value) {
+			this[name] = value;
+			return this;
+		},
+		/* element_prop> */
+
 		/* <element_html */
 		getHTML: function() {
 			return this.innerHTML;
