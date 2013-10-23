@@ -958,6 +958,9 @@
 
 		/* <element_append */
 		append: function(child) {
+			if ( typeof child == 'string' ) {
+				child = D.createTextNode(child);
+			}
 			this.appendChild(child);
 			return this;
 		},
