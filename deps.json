@@ -51,7 +51,7 @@
 
 	eventable: ['_date_now', 'anyevent'],
 	eventable_on: ['eventable', 'anyevent', 'element_ancestor'],
-	eventable_off: ['eventable'],
+	eventable_off: ['eventable', 'array_defaultfilter'],
 	eventable_fire: ['eventable', 'anyevent'],
 	eventable_globalfire: ['eventable', 'anyevent', 'eventable_fire', 'string_camel'],
 

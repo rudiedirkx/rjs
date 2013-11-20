@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Sortable RJS</title>
+	<meta charset="utf-8" />
+	<style>
+	em { font-size: 120%; font-weight: bold; }
+	table { border-spacing: 2px; }
+	th, td { padding: 5px 9px; }
+	thead td, th.thead {
+		background: #444;
+		color: #fff;
+		font-weight: bold;
+		text-align: center;
+	}
+	th { background: #bbb; }
+	tbody tr { background: #eee; }
+	tbody tr:nth-child(even) {
+		background: #ddd;
+	}
+
+	td.id {
+		cursor: move;
+	}
+	tr.last-dragged td {
+		background-color: lightblue;
+	}
+	tr.dragging td {
+		background-color: lightgreen;
+	}
+	</style>
+</head>
+
+<body>
+
+	<p>Drag sort these rows by their handle: column <em>#</em>.</p>
+
+	<table>
+		<thead>
+			<tr><td colspan=4>Caption</td></tr>
+			<tr>
+				<th>Something</th>
+				<th class="thead">#</th>
+				<th>Morething</th>
+				<th>Elsething</th>
+			</tr>
+		</thead>
+		<tbody id=container>
+			<tr data-id="1" class="r-1"><td>A</td><td class="id">B</td><td>C</td><td>D</td></tr>
+			<tr data-id="2" class="r-2"><td>E</td><td class="id">F</td><td>G</td><td>H</td></tr>
+			<tr data-id="3" class="r-3"><td>I</td><td class="id">J</td><td>K</td><td>L</td></tr>
+			<tr data-id="4" class="r-4"><td>M</td><td class="id">N</td><td>O</td><td>P</td></tr>
+		</tbody>
+	</table>
+
+	<script src="rjs.js"></script>
+	<script>
+	on('load', function() {
+		r.js('rjs.sortable.js').on('load', function() {
+			// Create Element.Sortable
+			$('container')
+				.sortable({
+					/* options */
+					handle: 'td.id'
+				})
+				// Specific event to directly save the new order somewhere
+				.on('sortableEnd', function(e) {
+					saveSortableTable( this.getChildren().map(function(tr) {
+						return tr.data('id');
+					}) );
+				});
+			;
+
+			function saveSortableTable( order ) {
+				// Ajax Magick (TM) here, with cool non-blocking notifications etc
+				console.log('sorting order', order.join(' > '));
+			}
+
+			// GLOBAL events to handle visual response
+			window.on('sortableStart', function(e) {
+				e.subject.getElements('.last-dragged').removeClass('last-dragged');
+				e.data.dragging.addClass('dragging');
+			}).on('sortableDrag', function(e) {
+				e.data.switched.getFirst().textContent += '*';
+			}).on('sortableEnd', function(e) {
+				e.subject.getElements('.dragging').removeClass('dragging');
+				e.data.dragging.addClass('last-dragged');
+			});
+		});
+	});
+	</script>
+
+</body>
+
+</html>

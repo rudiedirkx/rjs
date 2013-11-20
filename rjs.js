@@ -8,14 +8,17 @@
 	var html = D.documentElement,
 		head = html.getElementsByTagName('head')[0];
 
+	var r = function r( id, sel ) {
+		return r.$(id, sel);
+	};
+
 	/* <json_alias */
 	JSON.encode = JSON.stringify;
 	JSON.decode = JSON.parse;
 	/* json_alias> */
 
 	/* <domready */
-	var domReadyAttached = false,
-		domIsReady = false;
+	var domReadyAttached = false;
 	/* domready> */
 
 	/* <element_show */
@@ -23,73 +26,73 @@
 	/* element_show> */
 
 	/* <ifsetor */
-	function $ifsetor(pri, sec) {
+	r.ifsetor = function(pri, sec) {
 		return pri !== undefined ? pri : sec;
-	}
+	};
 	/* ifsetor> */
 
-	function $arrayish(obj) {
+	r.arrayish = function(obj) {
 		return typeof obj.length == 'number' && typeof obj != 'string' && obj.constructor != Object;
-	}
+	};
 
 	/* <array */
-	function $array(list) {
+	r.array = function(list) {
 		var arr = [];
-		$each(list, function(el, i) {
+		r.each(list, function(el, i) {
 			arr.push(el);
 		});
 		return arr;
-	}
+	};
 	/* array> */
 
 	/* <class */
-	function $class(obj) {
+	r.class = function(obj) {
 		var code = String(obj.constructor);
 		return code.match(/ (.+?)[\(\]]/)[1];
-	}
+	};
 	/* class> */
 
-	function $is_a(obj, type) {
+	r.is_a = function(obj, type) {
 		return window[type] && obj instanceof window[type];
-	}
+	};
 
 	/* <serialize */
-	function $serialize(o, prefix) {
+	r.serialize = function(o, prefix) {
 		var q = [];
-		$each(o, function(v, k) {
+		r.each(o, function(v, k) {
 			var name = prefix ? prefix + '[' + k + ']' : k,
 			v = o[k];
 			if ( typeof v == 'object' ) {
-				q.push($serialize(v, name));
+				q.push(r.serialize(v, name));
 			}
 			else {
 				q.push(name + '=' + encodeURIComponent(v));
 			}
 		});
 		return q.join('&');
-	}
+	};
 	/* serialize> */
 
 	/* <copy */
-	function $copy(obj) {
+	r.copy = function(obj) {
 		return JSON.parse(JSON.stringify(obj));
-	}
+	};
 	/* copy> */
 
 	/* <merge */
-	function $merge(base) {
+	r.merge = function(base) {
 		for ( var i=1, L=arguments.length; i<L; i++ ) {
-			$each(arguments[i], function(value, name) {
+			r.each(arguments[i], function(value, name) {
 				base[name] = value;
 			});
 		}
 		return base;
-	}
+	};
 	/* merge> */
 
 
-	function $each(source, callback, context) {
-		if ( $arrayish(source) ) {
+	r.each = function(source, callback, context) {
+		if ( r.arrayish(source) ) {
 			for ( var i=0, L=source.length; i<L; i++ ) {
 				callback.call(context, source[i], i, source);
 			}
@@ -103,21 +106,21 @@
 		}
 
 		return source;
-	}
+	};
 
-	function $extend(Hosts, proto, Super) {
+	r.extend = function(Hosts, proto, Super) {
 		if ( !(Hosts instanceof Array) ) {
 			Hosts = [Hosts];
 		}
 
-		$each(Hosts, function(Host) {
+		r.each(Hosts, function(Host) {
 			if ( Super ) {
 				Host.prototype = Super;
 				Host.prototype.constructor = Host;
 			}
 
 			var methodOwner = Host.prototype ? Host.prototype : Host;
-			$each(proto, function(fn, name) {
+			r.each(proto, function(fn, name) {
 				methodOwner[name] = fn;
 
 				/* <elements_invoke */
@@ -129,15 +132,15 @@
 				/* elements_invoke> */
 			});
 		});
-	}
+	};
 
 	/* <getter */
-	function $getter(Host, prop, getter) {
+	r.getter = function(Host, prop, getter) {
 		Object.defineProperty(Host.prototype, prop, {get: getter});
-	}
+	};
 	/* getter> */
 
-	$extend(Array, {
+	r.extend(Array, {
 		/* <array_invoke */
 		invoke: function(method, args) {
 			var results = [];
@@ -183,7 +186,7 @@
 	};
 	/* array_defaultfilter> */
 
-	$extend(String, {
+	r.extend(String, {
 		/* <string_camel */
 		camel: function() {
 			// foo-bar => fooBar, -ms-foo => MsFoo
@@ -219,7 +222,7 @@
 			el.$classList = this;
 			this._reinit();
 		}
-		$extend(W.DOMTokenList, {
+		r.extend(W.DOMTokenList, {
 			_reinit: function() {
 				// Empty
 				this.length = 0;
@@ -262,15 +265,15 @@
 			}
 		});
 
-		$getter(Element, 'classList', function() {
+		r.getter(Element, 'classList', function() {
 			return this.$classList ? this.$classList._reinit() : new W.DOMTokenList(this);
 		});
 	}
 	/* _classlist> */
 
 	/* <asset_js */
-	function $loadJS(src) {
-		if ( $arrayish(src) ) {
+	r.js = function(src) {
+		if ( r.arrayish(src) ) {
 			var evt = new Eventable(src),
 				need = src.length,
 				have = 0,
@@ -281,7 +284,7 @@
 					evt.fire('error', e);
 				};
 			src.forEach(function(url) {
-				$loadJS(url).on('load', onLoad).on('error', onError);
+				r.js(url).on('load', onLoad).on('error', onError);
 			});
 			return evt;
 		}
@@ -293,17 +296,17 @@
 	/* <elements */
 	function Elements(source, selector) {
 		this.length = 0;
-		source && $each(source, function(el, i) {
+		source && r.each(source, function(el, i) {
 			el.nodeType === 1 && ( !selector || el.is(selector) ) && this.push(el);
 		}, this);
 	}
-	$extend(Elements, {
+	r.extend(Elements, {
 		/* <elements_invoke */
 		invoke: function(method, args) {
 			var returnSelf = false,
 				res = [],
 				isElements = false;
-			$each(this, function(el, i) {
+			r.each(this, function(el, i) {
 				var retEl = el[method].apply(el, args);
 				res.push( retEl );
 				if ( retEl == el ) returnSelf = true;
@@ -326,7 +329,7 @@
 		this.x = x;
 		this.y = y;
 	}
-	$extend(Coords2D, {
+	r.extend(Coords2D, {
 		/* <coords2d_add */
 		add: function(coords) {
 			return new Coords2D(this.x + coords.x, this.y + coords.y);
@@ -400,7 +403,7 @@
 		this.clientY = e.clientY;
 
 		/* <anyevent_touches */
-		this.touches = e.touches ? $array(e.touches) : null;
+		this.touches = e.touches ? r.array(e.touches) : null;
 
 		if ( this.touches && this.touches[0] ) {
 			this.pageX = this.touches[0].pageX;
@@ -423,18 +426,18 @@
 		this.total = e.total || e.totalSize;
 		this.loaded = e.loaded || e.position;
 	}
-	$extend(AnyEvent, {
+	r.extend(AnyEvent, {
 		/* <anyevent_summary */
 		summary: function(prefix) {
 			prefix || (prefix = '');
 			var summary = [];
-			$each(this, function(value, name) {
+			r.each(this, function(value, name) {
 				var original = value;
-				if ( original && $is_a(original, 'Coords2D') ) {
+				if ( original && r.is_a(original, 'Coords2D') ) {
 					value = original.join();
 				}
 				else if ( original && typeof original == 'object' ) {
-					value = $class(value);
+					value = r.class(value);
 					if ( original instanceof Event || name == 'touches' || typeof name == 'number' ) {
 						value += ":\n" + AnyEvent.prototype.summary.call(original, prefix + '  ');
 					}
@@ -519,7 +522,7 @@
 	/* event_custom> */
 
 	/* <native_extend */
-	$each([
+	r.each([
 		window, 
 		document, 
 		Element,
@@ -528,7 +531,7 @@
 		/* elements> */
 	], function(Host) {
 		Host.extend = function(methods) {
-			$extend([this], methods);
+			r.extend([this], methods);
 		};
 	});
 	/* native_extend> */
@@ -538,14 +541,14 @@
 		this.subject = subject;
 		this.time = Date.now();
 	}
-	$extend(Eventable, {
+	r.extend(Eventable, {
 		/* <eventable_on */
 		on: function(eventType, matches, callback) {
 			callback || (callback = matches) && (matches = null);
 
 			var options = {
 				bubbles: !!matches,
-				subject: this
+				subject: this || W
 			};
 
 			var baseType = eventType,
@@ -597,7 +600,7 @@
 			if ( this.$events && this.$events[eventType] ) {
 				var events = this.$events[eventType],
 					changed = false;
-				$each(events, function(listener, i) {
+				r.each(events, function(listener, i) {
 					if ( !callback || callback == listener.original ) {
 						changed = true;
 						delete events[i];
@@ -614,7 +617,7 @@
 		fire: function(eventType, e, arg2) {
 			if ( this.$events && this.$events[eventType] ) {
 				e || (e = new AnyEvent(eventType));
-				$each(this.$events[eventType], function(listener) {
+				r.each(this.$events[eventType], function(listener) {
 					listener.callback.call(this, e, arg2);
 				}, this);
 			}
@@ -637,11 +640,11 @@
 	/* eventable> */
 
 	/* <native_eventable */
-	$extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
-	W.XMLHttpRequestUpload && $extend([XMLHttpRequestUpload], Eventable.prototype);
+	r.extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
+	W.XMLHttpRequestUpload && r.extend([XMLHttpRequestUpload], Eventable.prototype);
 	/* native_eventable> */
 
-	$extend(Node, {
+	r.extend(Node, {
 		/* <element_ancestor */
 		firstAncestor: function(selector) {
 			var el = this;
@@ -706,7 +709,7 @@
 	});
 
 	/* <document_el */
-	$extend(document, {
+	r.extend(document, {
 		el: function(tag, attrs) {
 			var el = this.createElement(tag);
 			attrs && el.attr(attrs);
@@ -732,7 +735,7 @@
 	/* element_attr2method> */
 
 	var EP = Element.prototype;
-	$extend(Element, {
+	r.extend(Element, {
 		/* <element_prop */
 		prop: function(name, value) {
 			if ( value !== undefined ) {
@@ -835,7 +838,7 @@
 				}
 
 				// (un)set multiple attributes
-				$each(name, function(value, name) {
+				r.each(name, function(value, name) {
 					if ( value === null ) {
 						this.removeAttribute(prefix + name);
 					}
@@ -974,7 +977,7 @@
 				}
 
 				// Set multiple properties
-				$each(property, function(value, name) {
+				r.each(property, function(value, name) {
 					this.style[name] = value;
 				}, this);
 				return this;
@@ -1037,13 +1040,13 @@
 		/* element_scroll> */
 	});
 
-	$extend(document, {
+	r.extend(document, {
 		getElement: Element.prototype.getElement,
 		getElements: Element.prototype.getElements
 	});
 
 	/* <windoc_scroll */
-	$extend([W, D], {
+	r.extend([W, D], {
 		getScroll: function() {
 			return new Coords2D(
 				document.documentElement.scrollLeft || document.body.scrollLeft,
@@ -1074,7 +1077,7 @@
 	function $(id, selector) {
 		/* <domready */
 		if ( typeof id == 'function' ) {
-			if ( domIsReady ) {
+			if ( D.readyState == 'interactive' || D.readyState == 'complete' ) {
 				setTimeout(id, 1);
 				return D;
 			}
@@ -1094,13 +1097,13 @@
 
 	/* <elements */
 	function $$(selector) {
-		return $arrayish(selector) ? new Elements(selector) : D.getElements(selector);
+		return r.arrayish(selector) ? new Elements(selector) : D.getElements(selector);
 	}
 	/* elements> */
 
 	/* <xhr */
 	function XHR(url, options) {
-		options = $merge({}, {
+		options = r.merge({}, {
 			method: 'GET',
 			async: true,
 			send: true,
@@ -1160,7 +1163,7 @@
 			}
 		});
 		if ( options.method == 'POST' ) {
-			if ( !$is_a(options.data, 'FormData') ) {
+			if ( !r.is_a(options.data, 'FormData') ) {
 				var encoding = options.encoding ? '; charset=' + encoding : '';
 				xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded' + encoding);
 			}
@@ -1199,34 +1202,19 @@
 
 
 
-	// Expose
-	/* <ifsetor */
-	W.$ifsetor = $ifsetor;
-	/* ifsetor> */
-	W.$arrayish = $arrayish;
-	/* <array */
-	W.$array = $array;
-	/* array> */
-	/* <class */
-	W.$class = $class;
-	/* class> */
-	W.$is_a = $is_a;
-	/* <serialize */
-	W.$serialize = $serialize;
-	/* serialize> */
-	/* <copy */
-	W.$copy = $copy;
-	/* copy> */
-	/* <merge */
-	W.$merge = $merge;
-	/* merge> */
-	W.$each = $each;
-	W.$extend = $extend;
-	/* <getter */
-	W.$getter = $getter;
-	/* getter> */
+	// Expose to `r`
+	r.$ = $;
+	r.$$ = $$;
+	W.r = r;
 
-	W.$ = $;
+	/* <xhr */
+	r.xhr = XHR;
+	r.get = shortXHR('get');
+	r.post = shortXHR('post');
+	/* xhr> */
+
+	// Expose to `$`
+	W.$ = r;
 
 	/* <elements */
 	W.$$ = $$;
@@ -1244,16 +1232,6 @@
 	/* <coords2d */
 	W.Coords2D = Coords2D;
 	/* coords2d> */
-
-	/* <xhr */
-	W.$.xhr = XHR;
-	W.$.get = shortXHR('get');
-	W.$.post = shortXHR('post');
-	/* xhr> */
-
-	/* <asset_js */
-	W.$.js = $loadJS;
-	/* asset_js> */
 
 	// } catch (ex) { alert(ex); }
 

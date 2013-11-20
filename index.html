@@ -29,7 +29,11 @@ pre {
 
 <body>
 
-<p><a href="build.html">DOWNLOAD YOUR CUSTOM BUILD HERE</a></p>
+<p>
+	<a href="build.html">DOWNLOAD YOUR CUSTOM BUILD HERE</a>
+	or
+	<a href="sortable.html">TRY THE SORTABLE DEMO</a>
+</p>
 
 <p>
 	<label><input type="checkbox" id="htmlmargin" /> HTML margin-left</label>
@@ -93,7 +97,7 @@ function printSummary(txt) {
 // Prototyping Element
 Element.extend({
 	zebra: function() {
-		$each(this.getChildren(), function(el, i) {
+		$.each(this.getChildren(), function(el, i) {
 			console.log(i, el);
 			var c = i%2 == 0 ? 'odd' : 'even';
 			el.classList.remove('odd');

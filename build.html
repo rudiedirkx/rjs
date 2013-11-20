@@ -34,7 +34,9 @@ pre {
 <p>
 	(<a id=save href="#">save</a>)
 	<button disabled>Download</button>
-	<span>?</span> KB / ~ <span>?</span> KB <a target=_blank href="http://marijnhaverbeke.nl/uglifyjs">minified</a>
+	<span>?</span> KB /
+	~ <span>?</span> KB <a target=_blank href="http://marijnhaverbeke.nl/uglifyjs">minified</a> /
+	~ <span>?</span> KB gzipped
 </p>
 
 <pre id=code></pre>
@@ -44,12 +46,14 @@ pre {
 "use strict";
 
 var deps, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
-var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text';
+var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text,-_element_contains,-_classlist,-_date_now,-ifsetor';
 
 function setSize(length) {
 	$button
 		.getNext().setText(Math.ceil(length / 100) / 10)
-		.getNext().setText(Math.ceil(0.575 * length / 100) / 10);
+		.getNext().setText(Math.ceil(0.6 * length / 100) / 10)
+		.getNext().getNext().setText(Math.ceil(0.22 * length / 100) / 10)
+	;
 }
 
 function build(size) {
@@ -71,6 +75,8 @@ function build(size) {
 }
 
 function upDeps(cb) {
+	if ( cb.name[0] == '_' ) return;
+
 	var deps = depsMap[ cb.checked ? 'enable' : 'disable' ][ cb.name ];
 	deps.forEach(function(name) {
 		var depCb = $('cb-' + name);
@@ -82,7 +88,7 @@ function upDeps(cb) {
 
 function createTable(deps) {
 	var ul = document.el('ul');
-	$each(deps, function(x, name) {
+	$.each(deps, function(x, name) {
 		document.el('li').setHTML('<label class="checked" title="Requires: \n- ' + depsMap.enable[name].join('\n- ') + '\n\nRequired by: \n- ' + depsMap.disable[name].join('\n- ') + '"><input type=checkbox id="cb-' + name + '" name="' + name + '" checked disabled> ' + name + '</label>').inject(ul);
 	});
 
@@ -113,10 +119,10 @@ function reinState() {
 }
 
 function createDepsMap(deps) {
-	$each(deps, function(requires, name) {
+	$.each(deps, function(requires, name) {
 		depsMap.enable[name] = requires;
 		depsMap.disable[name] || (depsMap.disable[name] = []);
-		$each(requires, function(requirement) {
+		$.each(requires, function(requirement) {
 			depsMap.disable[requirement] || (depsMap.disable[requirement] = []);
 			depsMap.disable[requirement].push(name);
 		});
@@ -168,7 +174,7 @@ function init() {
 	});
 }
 
-$extend(String, {
+$.extend(String, {
 	validJSON: function() {
 		return this.replace(/(\w+):/g, '"$1":').replace(/'/g, '"');
 	}

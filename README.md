@@ -16,6 +16,8 @@ DOMReady
 
 One element by id:
 
+	// r === $
+    el = r('id');
     el = $('id');
 	el = document.getElement('#id');
 	el = $('#id', true);
@@ -141,7 +143,8 @@ Extend HTML elements like this:
 
 Extend other classes like this:
 
-	$extend(AnyEvent, {
+	// r.extend === $.extend
+	r.extend(AnyEvent, {
 		stop: function() {
 			this.preventDefault();
 			this.stopPropagation();
@@ -172,7 +175,7 @@ Coordinates are now easy:
 
 And even easier. If you need a reverse():
 
-	$extend(Coords2D, {
+	r.extend(Coords2D, {
 		multiply: function(factor) {
 			return new Coords2D(this.x * factor, this.y * factor);
 		},
