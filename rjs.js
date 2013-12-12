@@ -52,9 +52,11 @@
 	};
 	/* class> */
 
+	/* <is_a */
 	r.is_a = function(obj, type) {
 		return window[type] && obj instanceof window[type];
 	};
+	/* is_a> */
 
 	/* <serialize */
 	r.serialize = function(o, prefix) {
@@ -202,21 +204,11 @@
 		/* string_camel> */
 	});
 
-	var indexOf = [].indexOf,
-		slice = [].slice,
-		push = [].push,
-		splice = [].splice,
-		join = [].join,
-		pop = [].join;
-
-	/* <_date_now */
-	typeof Date.now == 'function' || (Date.now = function() {
-		return +new Date;
-	});
-	/* _date_now> */
+	var indexOf = [].indexOf;
 
 	/* <_classlist */
 	if (!('classList' in html)) {
+		var push = [].push;
 		W.DOMTokenList = function DOMTokenList(el) {
 			this._el = el;
 			el.$classList = this;
@@ -237,7 +229,7 @@
 				return this;
 			},
 			set: function() {
-				this._el.className = join.call(this, ' ');
+				this._el.className = [].join.call(this, ' ');
 			},
 			add: function(token) {
 				push.call(this, token);
@@ -252,7 +244,7 @@
 			remove: function(token) {
 				var i = indexOf.call(this, token);
 				if ( i != -1 ) {
-					splice.call(this, i, 1);
+					[].splice.call(this, i, 1);
 					this.set();
 				}
 			},
@@ -740,6 +732,7 @@
 		prop: function(name, value) {
 			if ( value !== undefined ) {
 				this[name] = value;
+				return this;
 			}
 
 			return this[name];
@@ -747,7 +740,7 @@
 		/* element_prop> */
 
 		/* <element_is */
-		is: EP.matches || EP.webkitMatches || EP.mozMatches || EP.msMatches || EP.oMatches || EP.matchesSelector || EP.webkitMatchesSelector || EP.mozMatchesSelector || EP.msMatchesSelector || EP.oMatchesSelector || function(selector) {
+		is: EP.matches || EP.matchesSelector || EP.webkitMatchesSelector || EP.mozMatchesSelector || EP.msMatchesSelector || function(selector) {
 			return $$(selector).contains(this);
 		},
 		/* element_is> */
@@ -792,12 +785,6 @@
 			return this.is(selector) ? this : this.firstAncestor(selector);
 		},
 		/* element_ancestor> */
-
-		/* <_element_contains */
-		contains: Element.prototype.contains || function(child) {
-			return this.getElements('*').contains(child);
-		},
-		/* _element_contains> */
 
 		/* <element_children */
 		getChildren: function(selector) {
@@ -1042,7 +1029,9 @@
 
 	r.extend(document, {
 		getElement: Element.prototype.getElement,
+		/* <elements */
 		getElements: Element.prototype.getElements
+		/* elements> */
 	});
 
 	/* <windoc_scroll */
@@ -1202,19 +1191,19 @@
 
 
 
-	// Expose to `r`
+	// Expose to `r` & `$`
 	r.$ = $;
+	W.$ = W.r = r;
+
+	/* <elements */
 	r.$$ = $$;
-	W.r = r;
+	/* elements> */
 
 	/* <xhr */
 	r.xhr = XHR;
 	r.get = shortXHR('get');
 	r.post = shortXHR('post');
 	/* xhr> */
-
-	// Expose to `$`
-	W.$ = r;
 
 	/* <elements */
 	W.$$ = $$;

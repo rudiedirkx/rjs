@@ -2,6 +2,8 @@
 <html>
 
 <head>
+<meta charset="utf-8" />
+<title>RJS custom builder</title>
 <style>
 ul {
 	-webkit-columns: 4;
@@ -30,6 +32,10 @@ pre {
 </head>
 
 <body onload="init()">
+
+<p><a href onclick="$$('input:checked').prop('checked', !1).map(cbColor); build(true); return false">Unselect all</a></p>
+
+<ul></ul>
 
 <p>
 	(<a id=save href="#">save</a>)
@@ -66,7 +72,13 @@ function build(size) {
 		code = code.replace(regex, '');
 	});
 
-	code = code.replace(/\/\*[\s\S]+?\*\//g, '').replace(/\/\/ .+/g, '').replace(/\t+[\r\n]/g, '').trim();
+	code = code
+		.replace(/\/\*[\s\S]+?\*\//g, '') // block comments
+		.replace(/\/\/ .+/g, '') // line comments
+		.replace(/r\.extend\(\w+, {[\s\r\n]+}\);/g, '') // empty extends
+		.replace(/,([\r\n\s]+?)}/g, '$1}') // trailing commas
+		.replace(/\t+[\r\n]+/g, '') // empty lines
+		.trim();
 	$('code').setText(code);
 
 	size && setSize(code.length);
@@ -75,19 +87,23 @@ function build(size) {
 }
 
 function upDeps(cb) {
-	if ( cb.name[0] == '_' ) return;
+	if ( cb.name[0] == '_' ) return cb;
 
 	var deps = depsMap[ cb.checked ? 'enable' : 'disable' ][ cb.name ];
 	deps.forEach(function(name) {
+		if ( name[0] == '_' ) return;
+
 		var depCb = $('cb-' + name);
 		depCb.checked = cb.checked;
 		cbColor(depCb);
 		upDeps(depCb);
 	});
+
+	return cb;
 }
 
 function createTable(deps) {
-	var ul = document.el('ul');
+	var ul = $('ul', 1);
 	$.each(deps, function(x, name) {
 		document.el('li').setHTML('<label class="checked" title="Requires: \n- ' + depsMap.enable[name].join('\n- ') + '\n\nRequired by: \n- ' + depsMap.disable[name].join('\n- ') + '"><input type=checkbox id="cb-' + name + '" name="' + name + '" checked disabled> ' + name + '</label>').inject(ul);
 	});
@@ -143,7 +159,7 @@ function init() {
 
 		createDepsMap(deps);
 
-		createTable(deps).injectTop(document.body);
+		createTable(deps);
 		reinState();
 
 		--waiting || ready();
