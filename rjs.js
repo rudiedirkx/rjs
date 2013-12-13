@@ -752,12 +752,13 @@
 		/* element_is> */
 
 		/* <element_value */
-		getValue: function() {
-			if ( !this.disabled ) {
+		getValue: function(force) {
+			if ( !this.disabled || force ) {
 				if ( this.nodeName == 'SELECT' && this.multiple ) {
-					return [].filter.call(this.options, function(option) {
-						return option.selected;
-					});
+					return [].reduce.call(this.options, function(values, option) {
+						option.selected && values.push(option.value);
+						return values;
+					}, []);
 				}
 				else if ( this.type == 'radio' || this.type == 'checkbox' && !this.checked ) {
 					return;
