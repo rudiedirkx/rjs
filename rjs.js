@@ -556,7 +556,7 @@
 				// Find event subject
 				var subject = options.subject;
 				if ( e && e.target && matches ) {
-					if ( !(subject = e.target.selfOrFirstAncestor(matches)) ) {
+					if ( !(subject = e.target.selfOrAncestor(matches)) ) {
 						return;
 					}
 				}
@@ -638,7 +638,7 @@
 
 	r.extend(Node, {
 		/* <element_ancestor */
-		firstAncestor: function(selector) {
+		ancestor: function(selector) {
 			var el = this;
 			while ( (el = el.parentNode) && el != D ) {
 				if ( el.is(selector) ) {
@@ -649,25 +649,31 @@
 		/* element_ancestor> */
 
 		/* <element_siblings */
-		getNext: function() {
-			if ( this.nextElementSibling !== undefined ) {
+		getNext: function(selector) {
+			/* <element_is */
+			if ( !selector ) {
+				/* element_is> */
 				return this.nextElementSibling;
+				/* <element_is */
 			}
 
 			var sibl = this;
-			while ( (sibl = sibl.nextSibling) && sibl.nodeType != 1 );
-
+			while ( (sibl = sibl.nextElementSibling) && !sibl.is(selector) );
 			return sibl;
+			/* element_is> */
 		},
-		getPrev: function() {
-			if ( this.previousElementSibling !== undefined ) {
+		getPrev: function(selector) {
+			/* <element_is */
+			if ( !selector ) {
+				/* element_is> */
 				return this.previousElementSibling;
+				/* <element_is */
 			}
 
 			var sibl = this;
-			while ( (sibl = sibl.previousSibling) && sibl.nodeType != 1 );
-
+			while ( (sibl = sibl.previousElementSibling) && !sibl.is(selector) );
 			return sibl;
+			/* element_is> */
 		},
 		/* element_siblings> */
 
@@ -781,8 +787,8 @@
 		/* element_toquerystring> */
 
 		/* <element_ancestor */
-		selfOrFirstAncestor: function(selector) {
-			return this.is(selector) ? this : this.firstAncestor(selector);
+		selfOrAncestor: function(selector) {
+			return this.is(selector) ? this : this.ancestor(selector);
 		},
 		/* element_ancestor> */
 
