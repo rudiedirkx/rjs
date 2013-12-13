@@ -33,7 +33,7 @@ pre {
 
 <body onload="init()">
 
-<p><a href onclick="$$('input:checked').prop('checked', !1).map(cbColor); build(true); return false">Unselect all</a></p>
+<p><a href="" onclick="$$('input:checked').prop('checked', !1).map(cbColor); build(true); return false">Unselect all</a></p>
 
 <ul></ul>
 
@@ -52,7 +52,7 @@ pre {
 "use strict";
 
 var deps, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
-var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text,-_element_contains,-_classlist,-_date_now,-ifsetor';
+var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text,-_element_contains,-_classlist,-ifsetor,-array_diff,-array_intersect';
 
 function setSize(length) {
 	$button

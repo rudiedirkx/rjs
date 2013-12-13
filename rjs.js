@@ -179,8 +179,24 @@
 		},
 		last: function() {
 			return this[this.length-1];
-		}
+		},
 		/* array_firstlast> */
+
+		/* <array_intersect */
+		intersect: function(arr2) {
+			return this.filter(function(el) {
+				return arr2.contains(el);
+			});
+		},
+		/* array_intersect> */
+
+		/* <array_diff */
+		diff: function(arr2) {
+			return this.filter(function(el) {
+				return !arr2.contains(el);
+			});
+		},
+		/* array_diff> */
 	});
 	/* <array_defaultfilter */
 	Array.defaultFilterCallback = function(item) {
@@ -200,8 +216,14 @@
 			return this.replace(/([A-Z])/g, function(a, m) {
 				return '-' + m.toLowerCase();
 			});
-		}
+		},
 		/* string_camel> */
+
+		/* <string_repeat */
+		repeat: function(num) {
+			return new Array(num+1).join(this);
+		},
+		/* string_repeat> */
 	});
 
 	var indexOf = [].indexOf;
@@ -468,7 +490,7 @@
 	/* anyevent> */
 
 	/* <event_keys */
-	Event.Keys = {"enter": 13, "up": 38, "down": 40, "left": 37, "right": 39, "esc": 27, "space": 32, "backspace": 8, "tab": 9, "delete": 46};
+	Event.Keys = {enter: 13, up: 38, down: 40, left: 37, right: 39, esc: 27, space: 32, backspace: 8, tab: 9, delete: 46};
 	/* event_keys> */
 
 	/* <event_custom */

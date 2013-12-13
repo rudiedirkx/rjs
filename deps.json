@@ -15,9 +15,12 @@
 	array_unique: [],
 	array_each: [],
 	array_firstlast: [],
+	array_intersect: ['array_contains'],
+	array_diff: ['array_contains'],
 	array_defaultfilter: [],
 
 	string_camel: [],
+	string_repeat: [],
 
 	_classlist: ['getter'],
 
