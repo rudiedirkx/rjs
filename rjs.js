@@ -32,7 +32,7 @@
 	/* ifsetor> */
 
 	r.arrayish = function(obj) {
-		return typeof obj.length == 'number' && typeof obj != 'string' && obj.constructor != Object;
+		return obj instanceof Array || ( typeof obj.length == 'number' && typeof obj != 'string' && ( obj[0] !== undefined || obj.length == 0 ) );
 	};
 
 	/* <array */
@@ -537,8 +537,8 @@
 
 	/* <native_extend */
 	r.each([
-		window, 
-		document, 
+		window,
+		document,
 		Element,
 		/* <elements */
 		Elements
