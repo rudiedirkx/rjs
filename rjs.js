@@ -1135,50 +1135,56 @@
 		var xhr = new XMLHttpRequest;
 		xhr.open(options.method, options.url, options.async, options.username, options.password);
 		xhr.options = options;
-		xhr.on('readystatechange', function(e) {
-			if ( this.readyState == 4 ) {
-				var success = this.status == 200,
-					eventType = success ? 'success' : 'error',
-					t = this.responseText;
+		xhr.on('load', function(e) {
+			var success = this.status == 200,
+				eventType = success ? 'success' : 'error',
+				t = this.responseText;
 
-				try {
-					this.responseJSON = (t[0] == '[' || t[0] == '{') && JSON.parse(t);
-				}
-				catch (ex) {}
-				var response = this.responseJSON || this.responseXML || t;
+			try {
+				this.responseJSON = (t[0] == '[' || t[0] == '{') && JSON.parse(t);
+			}
+			catch (ex) {}
+			var response = this.responseJSON || t;
 
-				// Collect <SCRIPT>s from probable HTML response
-				if ( this.options.execScripts ) {
-					var scripts = [];
-					if ( typeof response == 'string' ) {
-						var regex = /<script[^>]*>([\s\S]*?)<\/script>/i,
-							script;
-						while ( script = response.match(regex) ) {
-							response = response.replace(regex, '');
-							if ( script = script[1].trim() ) {
-								scripts.push(script);
-							}
+			// Collect <SCRIPT>s from probable HTML response
+			if ( this.options.execScripts ) {
+				var scripts = [];
+				if ( typeof response == 'string' ) {
+					var regex = /<script[^>]*>([\s\S]*?)<\/script>/i,
+						script;
+					while ( script = response.match(regex) ) {
+						response = response.replace(regex, '');
+						if ( script = script[1].trim() ) {
+							scripts.push(script);
 						}
 					}
 				}
-
-				// Specific events
-				this.fire(eventType, e, response);
-				this.fire('done', e, response);
-
-				// Execute collected <SCRIPT>s after specific callback, but before global
-				if ( this.options.execScripts && scripts.length ) {
-					scripts.forEach(function(code) {
-						eval(code);
-					});
-				}
-
-				/* <xhr_global */
-				// Global events
-				this.globalFire('xhr', eventType, e, response);
-				this.globalFire('xhr', 'done', e, response);
-				/* xhr_global> */
 			}
+
+			// Specific events
+			this.fire(eventType, e, response);
+			this.fire('done', e, response);
+
+			// Execute collected <SCRIPT>s after specific callback, but before global
+			if ( this.options.execScripts && scripts.length ) {
+				scripts.forEach(function(code) {
+					eval(code);
+				});
+			}
+
+			/* <xhr_global */
+			this.globalFire('xhr', eventType, e, response);
+			this.globalFire('xhr', 'done', e, response);
+			/* xhr_global> */
+		});
+		xhr.on('error', function(e) {
+			this.fire('error', e);
+			this.fire('done', e);
+
+			/* <xhr_global */
+			this.globalFire('xhr', 'error', e);
+			this.globalFire('xhr', 'done', e);
+			/* xhr_global> */
 		});
 		if ( options.method == 'POST' ) {
 			if ( !r.is_a(options.data, 'FormData') ) {
