@@ -590,7 +590,9 @@
 					}
 				}
 
+				/* <anyevent_subject */
 				e.subject || e.setSubject(subject);
+				/* anyevent_subject> */
 				return callback.call(subject, e, arg2);
 			}
 
@@ -1168,7 +1170,7 @@
 			// Execute collected <SCRIPT>s after specific callback, but before global
 			if ( this.options.execScripts && scripts.length ) {
 				scripts.forEach(function(code) {
-					eval(code);
+					eval.call(W, code);
 				});
 			}
 
@@ -1178,7 +1180,6 @@
 			/* xhr_global> */
 		});
 		xhr.on('error', function(e) {
-			this.fire('error', e);
 			this.fire('done', e);
 
 			/* <xhr_global */
