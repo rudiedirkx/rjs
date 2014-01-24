@@ -254,8 +254,10 @@
 				this._el.className = [].join.call(this, ' ');
 			},
 			add: function(token) {
-				push.call(this, token);
-				this.set();
+				if ( !this.contains(token) ) {
+					push.call(this, token);
+					this.set();
+				}
 			},
 			contains: function(token) {
 				return indexOf.call(this, token) !== -1;
@@ -490,7 +492,7 @@
 	/* anyevent> */
 
 	/* <event_keys */
-	Event.Keys = {enter: 13, up: 38, down: 40, left: 37, right: 39, esc: 27, space: 32, backspace: 8, tab: 9, delete: 46};
+	Event.Keys = {enter: 13, up: 38, down: 40, left: 37, right: 39, esc: 27, space: 32, backspace: 8, tab: 9, "delete": 46};
 	/* event_keys> */
 
 	/* <event_custom */

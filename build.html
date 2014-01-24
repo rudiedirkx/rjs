@@ -93,7 +93,7 @@ function build(size, state) {
 }
 
 function upDeps(cb) {
-	if ( cb.name[0] == '_' ) return cb;
+	if ( cb.name[0] == '_' && !cb.checked ) return cb;
 
 	var deps = depsMap[ cb.checked ? 'enable' : 'disable' ][ cb.name ];
 	deps.forEach(function(name) {
