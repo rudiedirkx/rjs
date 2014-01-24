@@ -51,7 +51,7 @@ pre {
 <script>
 "use strict";
 
-var deps, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
+var deps, $code, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
 var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text,-_element_contains,-_classlist,-ifsetor,-array_diff,-array_intersect';
 
 function setSize(length) {
@@ -62,10 +62,10 @@ function setSize(length) {
 	;
 }
 
-function build(size) {
+function build(size, state) {
 	var code = source;
 
-	// Don't add what's checked. Remove what's not.
+	// Start with everything. Remove what's unchecked.
 	$$('input:not(:checked)').each(function(inp) {
 		var name = inp.name;
 		var regex = new RegExp('\\/\\* <' + name + ' \\*\\/[\\s\\S]+?\\/\\* ' + name + '> \\*\\/', 'g');
@@ -78,10 +78,16 @@ function build(size) {
 		.replace(/r\.extend\(\w+, {[\s\r\n]+}\);/g, '') // empty extends
 		.replace(/,([\r\n\s]+?)}/g, '$1}') // trailing commas
 		.replace(/\t+[\r\n]+/g, '') // empty lines
-		.trim();
-	$('code').setText(code);
+		.trim() + "\n";
 
 	size && setSize(code.length);
+
+	if (state) {
+		var state = '// build.html#' + getBuildState().join(',');
+		code = state + "\n\n" + code + "\n";
+	}
+
+	$code.setText(code);
 
 	return code;
 }
@@ -150,9 +156,20 @@ function ready() {
 	build(true);
 }
 
+function getBuildState() {
+	var state = [];
+	$$('ul input[type=checkbox]').each(function(el) {
+		if ( el.checked != el.defaultChecked ) {
+			state.push((el.checked ? '+' : '-') + el.name);
+		}
+	});
+	return state;
+}
+
 function init() {
 	$button = $('button', 1);
 	$save = $('save');
+	$code = $('code');
 
 	$.get('deps.json').on('success', function(e) {
 		deps = JSON.parse(this.responseText.validJSON());
@@ -172,7 +189,7 @@ function init() {
 	});
 
 	$button.on('click', function(e) {
-		var code = build(true),
+		var code = build(true, true),
 			blob = new Blob([code], {type: 'text/javascript'}),
 			uri = URL.createObjectURL(blob),
 			a = document.el('a', {href: uri, download: 'rjs-custom.js'});
@@ -180,12 +197,7 @@ function init() {
 	});
 
 	$save.on('click', function(e) {
-		var state = [];
-		$$('ul input[type=checkbox]').each(function(el) {
-			if ( el.checked != el.defaultChecked ) {
-				state.push((el.checked ? '+' : '-') + el.name);
-			}
-		});
+		var state = getBuildState();
 		this.href = '#' + state.join(',');
 	});
 }
