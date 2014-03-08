@@ -32,7 +32,7 @@
 	/* ifsetor> */
 
 	r.arrayish = function(obj) {
-		return obj instanceof Array || ( typeof obj.length == 'number' && typeof obj != 'string' && ( obj[0] !== undefined || obj.length == 0 ) );
+		return obj instanceof Array || ( typeof obj.length == 'number' && typeof obj != 'string' && ( obj[0] !== undefined || obj.length === 0 ) );
 	};
 
 	/* <array */
@@ -83,10 +83,11 @@
 
 	/* <merge */
 	r.merge = function(base) {
+		var merger = function(value, name) {
+			base[name] = value;
+		};
 		for ( var i=1, L=arguments.length; i<L; i++ ) {
-			r.each(arguments[i], function(value, name) {
-				base[name] = value;
-			});
+			r.each(arguments[i], merger);
 		}
 		return base;
 	};
@@ -195,7 +196,7 @@
 			return this.filter(function(el) {
 				return !arr2.contains(el);
 			});
-		},
+		}
 		/* array_diff> */
 	});
 	/* <array_defaultfilter */
@@ -222,7 +223,7 @@
 		/* <string_repeat */
 		repeat: function(num) {
 			return new Array(num+1).join(this);
-		},
+		}
 		/* string_repeat> */
 	});
 
@@ -235,7 +236,7 @@
 			this._el = el;
 			el.$classList = this;
 			this._reinit();
-		}
+		};
 		r.extend(W.DOMTokenList, {
 			_reinit: function() {
 				// Empty
@@ -306,7 +307,7 @@
 		}
 
 		return D.el('script', {src: src, type: 'text/javascript'}).inject(head);
-	}
+	};
 	/* asset_js> */
 
 	/* <elements */
@@ -659,7 +660,7 @@
 
 	/* <native_eventable */
 	r.extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
-	W.XMLHttpRequestUpload && r.extend([XMLHttpRequestUpload], Eventable.prototype);
+	W.XMLHttpRequestUpload && r.extend([W.XMLHttpRequestUpload], Eventable.prototype);
 	/* native_eventable> */
 
 	r.extend(Node, {
@@ -1128,7 +1129,7 @@
 
 	/* <xhr */
 	function XHR(url, options) {
-		options = r.merge({}, {
+		var defaults = {
 			method: 'GET',
 			async: true,
 			send: true,
@@ -1136,7 +1137,8 @@
 			url: url,
 			requester: 'XMLHttpRequest',
 			execScripts: true
-		}, options || {});
+		};
+		options = options ? r.merge({}, defaults, options) : defaults;
 		options.method = options.method.toUpperCase();
 
 		var xhr = new XMLHttpRequest;
@@ -1153,9 +1155,11 @@
 			catch (ex) {}
 			var response = this.responseJSON || t;
 
+			var scripts;
+
 			// Collect <SCRIPT>s from probable HTML response
 			if ( this.options.execScripts ) {
-				var scripts = [];
+				scripts = [];
 				if ( typeof response == 'string' ) {
 					var regex = /<script[^>]*>([\s\S]*?)<\/script>/i,
 						script;
@@ -1173,7 +1177,7 @@
 			this.fire('done', e, response);
 
 			// Execute collected <SCRIPT>s after specific callback, but before global
-			if ( this.options.execScripts && scripts.length ) {
+			if ( this.options.execScripts && scripts && scripts.length ) {
 				scripts.forEach(function(code) {
 					eval.call(W, code);
 				});
