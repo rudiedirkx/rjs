@@ -966,6 +966,9 @@
 			parent.appendChild(this);
 			return this;
 		},
+		appendTo: function(parent) {
+			return this.inject(parent); // Alias for inject()
+		},
 		injectTop: function(parent) {
 			parent.firstChild ? parent.insertBefore(this, parent.firstChild) : parent.appendChild(this);
 			return this;
