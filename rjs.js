@@ -305,7 +305,7 @@
 			return evt;
 		}
 
-		return document.el('script', {src: src, type: 'text/javascript'}).inject(head);
+		return D.el('script', {src: src, type: 'text/javascript'}).inject(head);
 	}
 	/* asset_js> */
 
@@ -733,7 +733,7 @@
 	});
 
 	/* <document_el */
-	r.extend(document, {
+	r.extend(D, {
 		el: function(tag, attrs) {
 			var el = this.createElement(tag);
 			attrs && el.attr(attrs);
@@ -1012,7 +1012,7 @@
 		/* <element_show */
 		show: function() {
 			if ( !cssDisplays[this.nodeName] ) {
-				var el = document.el(this.nodeName).inject(this.ownerDocument.body);
+				var el = D.el(this.nodeName).inject(this.ownerDocument.body);
 				cssDisplays[this.nodeName] = el.getStyle('display');
 				el.remove();
 			}
@@ -1060,7 +1060,7 @@
 		/* element_scroll> */
 	});
 
-	r.extend(document, {
+	r.extend(D, {
 		getElement: Element.prototype.getElement,
 		/* <elements */
 		getElements: Element.prototype.getElements
@@ -1071,8 +1071,8 @@
 	r.extend([W, D], {
 		getScroll: function() {
 			return new Coords2D(
-				document.documentElement.scrollLeft || document.body.scrollLeft,
-				document.documentElement.scrollTop || document.body.scrollTop
+				D.documentElement.scrollLeft || D.body.scrollLeft,
+				D.documentElement.scrollTop || D.body.scrollTop
 			);
 		}
 	});
@@ -1081,7 +1081,7 @@
 	/* <domready */
 	Event.Custom.ready = {
 		before: function() {
-			if ( this == document ) {
+			if ( this == D ) {
 				domReadyAttached || attachDomReady();
 			}
 		}
