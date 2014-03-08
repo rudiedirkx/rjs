@@ -164,7 +164,9 @@
 		unique: function() {
 			var els = [];
 			this.forEach(function(el) {
-				els.contains(el) || els.push(el);
+				if ( !els.contains(el) ) {
+					els.push(el);
+				}
 			});
 			return els;
 		},
@@ -295,7 +297,9 @@
 				need = src.length,
 				have = 0,
 				onLoad = function(e) {
-					++have == need && evt.fire('load', e);
+					if ( ++have == need ) {
+						evt.fire('load', e);
+					}
 				},
 				onError = function(e) {
 					evt.fire('error', e);
@@ -313,9 +317,13 @@
 	/* <elements */
 	function Elements(source, selector) {
 		this.length = 0;
-		source && r.each(source, function(el, i) {
-			el.nodeType === 1 && ( !selector || el.is(selector) ) && this.push(el);
-		}, this);
+		if ( source ) {
+			r.each(source, function(el, i) {
+				if ( el.nodeType === 1 && ( !selector || el.is(selector) ) ) {
+					this.push(el);
+				}
+			}, this);
+		}
 	}
 	r.extend(Elements, {
 		/* <elements_invoke */
@@ -370,7 +378,9 @@
 
 		/* <coords2d_join */
 		join: function(glue) {
-			glue == null && (glue = ',');
+			if ( glue == null ) {
+				glue = ',';
+			}
 			return [this.x, this.y].join(glue);
 		},
 		/* coords2d_join> */
@@ -446,7 +456,9 @@
 	r.extend(AnyEvent, {
 		/* <anyevent_summary */
 		summary: function(prefix) {
-			prefix || (prefix = '');
+			if ( prefix == null ) {
+				prefix = '';
+			}
 			var summary = [];
 			r.each(this, function(value, name) {
 				var original = value;
@@ -533,8 +545,12 @@
 	};
 
 	/* <_event_custom_mousenterleave */
-	'onmouseenter' in html && delete Event.Custom.mouseenter;
-	'onmouseleave' in html && delete Event.Custom.mouseleave;
+	if ( 'onmouseenter' in html ) {
+		delete Event.Custom.mouseenter;
+	}
+	if ( 'onmouseleave' in html ) {
+		delete Event.Custom.mouseleave;
+	}
 	/* _event_custom_mousenterleave> */
 	/* event_custom> */
 
@@ -561,7 +577,10 @@
 	r.extend(Eventable, {
 		/* <eventable_on */
 		on: function(eventType, matches, callback) {
-			callback || (callback = matches) && (matches = null);
+			if ( !callback ) {
+				callback = matches;
+				matches = null;
+			}
 
 			var options = {
 				bubbles: !!matches,
@@ -569,14 +588,17 @@
 			};
 
 			var baseType = eventType,
-				customEvent = false;
-			if ( Event.Custom[eventType] ) {
-				customEvent = Event.Custom[eventType];
-				customEvent.type && (baseType = customEvent.type);
+				customEvent;
+			if ( customEvent = Event.Custom[eventType] ) {
+				if ( customEvent.type ) {
+					baseType = customEvent.type;
+				}
 			}
 
-			function onCallback(e, arg2) {
-				e && !(e instanceof AnyEvent) && (e = new AnyEvent(e));
+			var onCallback = function(e, arg2) {
+				if ( e && !(e instanceof AnyEvent) ) {
+					e = new AnyEvent(e);
+				}
 
 				// Find event subject
 				var subject = options.subject;
@@ -594,10 +616,12 @@
 				}
 
 				/* <anyevent_subject */
-				e.subject || e.setSubject(subject);
+				if ( !e.subject ) {
+					e.setSubject(subject);
+				}
 				/* anyevent_subject> */
 				return callback.call(subject, e, arg2);
-			}
+			};
 
 			if ( customEvent && customEvent.before ) {
 				if ( customEvent.before.call(this, options) === false ) {
@@ -607,9 +631,17 @@
 
 			var events = options.subject.$events || (options.subject.$events = {});
 			events[eventType] || (events[eventType] = []);
-			events[eventType].push({type: baseType, original: callback, callback: onCallback, bubbles: options.bubbles});
+			events[eventType].push({
+				type: baseType,
+				original: callback,
+				callback: onCallback,
+				bubbles: options.bubbles
+			});
 
-			options.subject.addEventListener && options.subject.addEventListener(baseType, onCallback, options.bubbles);
+			if ( options.subject.addEventListener ) {
+				options.subject.addEventListener(baseType, onCallback, options.bubbles);
+			}
+
 			return this;
 		},
 		/* eventable_on> */
@@ -623,10 +655,14 @@
 					if ( !callback || callback == listener.original ) {
 						changed = true;
 						delete events[i];
-						this.removeEventListener && this.removeEventListener(listener.type, listener.callback, listener.bubbles);
+						if ( this.removeEventListener ) {
+							this.removeEventListener(listener.type, listener.callback, listener.bubbles);
+						}
 					}
 				}, this);
-				changed && (this.$events[eventType] = events.filter(Array.defaultFilterCallback));
+				if ( changed ) {
+					this.$events[eventType] = events.filter(Array.defaultFilterCallback);
+				}
 			}
 			return this;
 		},
@@ -635,7 +671,9 @@
 		/* <eventable_fire */
 		fire: function(eventType, e, arg2) {
 			if ( this.$events && this.$events[eventType] ) {
-				e || (e = new AnyEvent(eventType));
+				if ( !e ) {
+					e = new AnyEvent(eventType);
+				}
 				r.each(this.$events[eventType], function(listener) {
 					listener.callback.call(this, e, arg2);
 				}, this);
@@ -660,7 +698,9 @@
 
 	/* <native_eventable */
 	r.extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
-	W.XMLHttpRequestUpload && r.extend([W.XMLHttpRequestUpload], Eventable.prototype);
+	if ( W.XMLHttpRequestUpload ) {
+		r.extend([W.XMLHttpRequestUpload], Eventable.prototype);
+	}
 	/* native_eventable> */
 
 	r.extend(Node, {
@@ -735,9 +775,11 @@
 
 	/* <document_el */
 	r.extend(D, {
-		el: function(tag, attrs) {
-			var el = this.createElement(tag);
-			attrs && el.attr(attrs);
+		el: function(tagName, attrs) {
+			var el = this.createElement(tagName);
+			if ( attrs ) {
+				el.attr(attrs);
+			}
 			return el;
 		}
 	});
@@ -783,7 +825,9 @@
 			if ( !this.disabled || force ) {
 				if ( this.nodeName == 'SELECT' && this.multiple ) {
 					return [].reduce.call(this.options, function(values, option) {
-						option.selected && values.push(option.value);
+						if ( option.selected ) {
+							values.push(option.value);
+						}
 						return values;
 					}, []);
 				}
@@ -845,7 +889,9 @@
 
 		/* <element_attr */
 		attr: function(name, value, prefix) {
-			prefix == null && (prefix = '');
+			if ( prefix == null ) {
+				prefix = '';
+			}
 			if ( value === undefined ) {
 				// Get single attribute
 				if ( typeof name == 'string' ) {
@@ -971,7 +1017,12 @@
 			return this.inject(parent); // Alias for inject()
 		},
 		injectTop: function(parent) {
-			parent.firstChild ? parent.insertBefore(this, parent.firstChild) : parent.appendChild(this);
+			if ( parent.firstChild ) {
+				parent.insertBefore(this, parent.firstChild);
+			}
+			else {
+				parent.appendChild(this);
+			}
 			return this;
 		},
 		/* element_inject> */
@@ -1086,7 +1137,9 @@
 	Event.Custom.ready = {
 		before: function() {
 			if ( this == D ) {
-				domReadyAttached || attachDomReady();
+				if ( !domReadyAttached ) {
+					attachDomReady();
+				}
 			}
 		}
 	};
@@ -1203,14 +1256,23 @@
 			}
 		}
 		if ( options.send ) {
-			options.requester && xhr.setRequestHeader('X-Requested-With', options.requester);
+			if ( options.requester ) {
+				xhr.setRequestHeader('X-Requested-With', options.requester);
+			}
 
 			/* <xhr_global */
 			xhr.globalFire('xhr', 'start');
 			/* xhr_global> */
 			xhr.fire('start');
 
-			options.async ? setTimeout(function() { xhr.send(options.data); }, 1) : xhr.send(options.data);
+			if ( options.async ) {
+				setTimeout(function() {
+					xhr.send(options.data);
+				}, 1);
+			}
+			else {
+				xhr.send(options.data);
+			}
 		}
 		return xhr;
 	}
@@ -1225,7 +1287,9 @@
 
 	function shortXHR(method) {
 		return function(url, data, options) {
-			options || (options = {});
+			if ( !options ) {
+				options = {};
+			}
 			options.method = method;
 			options.data = data;
 			var xhr = XHR(url, options);
