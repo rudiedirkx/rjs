@@ -54,7 +54,7 @@
 
 	/* <is_a */
 	r.is_a = function(obj, type) {
-		return window[type] && obj instanceof window[type];
+		return W[type] && obj instanceof W[type];
 	};
 	/* is_a> */
 
@@ -539,8 +539,8 @@
 
 	/* <native_extend */
 	r.each([
-		window,
-		document,
+		W,
+		D,
 		Element,
 		/* <elements */
 		Elements
