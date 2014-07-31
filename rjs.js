@@ -480,14 +480,14 @@
 		preventDefault: function(e) {
 			if ( e = this.originalEvent ) {
 				e.preventDefault();
-				this.defaultPrevented = true;
 			}
+			this.defaultPrevented = true;
 		},
 		stopPropagation: function(e) {
 			if ( e = this.originalEvent ) {
 				e.stopPropagation();
-				this.propagationStopped = true;
 			}
+			this.propagationStopped = true;
 		},
 
 		/* <anyevent_subject */
