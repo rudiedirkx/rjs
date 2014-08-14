@@ -494,6 +494,14 @@
 			}
 			this.propagationStopped = true;
 		},
+		stopImmediatePropagation: function(e) {
+			this.stopPropagation();
+
+			if ( e = this.originalEvent ) {
+				e.stopImmediatePropagation();
+			}
+			this.immediatePropagationStopped = true;
+		},
 
 		/* <anyevent_subject */
 		setSubject: function(subject) {
@@ -679,8 +687,12 @@
 				if ( !e ) {
 					e = new AnyEvent(eventType);
 				}
+				var immediatePropagationStopped = false;
 				r.each(this.$events[eventType], function(listener) {
-					listener.callback.call(this, e, arg2);
+					if ( !immediatePropagationStopped ) {
+						listener.callback.call(this, e, arg2);
+						immediatePropagationStopped |= e.immediatePropagationStopped;
+					}
 				}, this);
 			}
 			return this;
