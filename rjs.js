@@ -275,12 +275,16 @@
 					this.set();
 				}
 			},
-			toggle: function(token) {
-				if ( this.contains(token) ) {
-					return !!this.remove(token);
+			toggle: function(token, add) {
+				if ( add == null ) {
+					add = !this.contains(token);
 				}
 
-				return !this.add(token);
+				if ( add ) {
+					return !this.add(token);
+				}
+
+				return !!this.remove(token);
 			}
 		});
 
@@ -1005,8 +1009,8 @@
 			this.classList.add(token);
 			return this;
 		},
-		toggleClass: function(token) {
-			this.classList.toggle(token);
+		toggleClass: function(token, add) {
+			this.classList.toggle.apply(this.classList, arguments);
 			return this;
 		},
 		replaceClass: function(before, after) {
@@ -1093,8 +1097,12 @@
 		hide: function() {
 			return this.css('display', 'none');
 		},
-		toggle: function() {
-			return this.getStyle('display') == 'none' ? this.show() : this.hide();
+		toggle: function(show) {
+			if ( show == null ) {
+				show = this.getStyle('display') == 'none';
+			}
+
+			return show ? this.show() : this.hide();
 		},
 		/* element_show> */
 
