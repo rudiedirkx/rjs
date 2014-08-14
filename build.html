@@ -171,7 +171,7 @@ function init() {
 	$save = $('save');
 	$code = $('code');
 
-	$.get('deps.json').on('success', function(e) {
+	$.get('deps.json?_=' + Math.random()).on('success', function(e) {
 		deps = JSON.parse(this.responseText.validJSON());
 
 		createDepsMap(deps);

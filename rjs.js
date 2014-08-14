@@ -340,6 +340,7 @@
 			return returnSelf ? this : ( isElements || !res.length ? new Elements(res) : res );
 		},
 		/* elements_invoke> */
+
 		filter: function(filter) {
 			if ( typeof filter == 'function' ) {
 				return new Elements([].filter.call(this, filter));
@@ -979,6 +980,22 @@
 		},
 		/* elements> */
 
+		/* <element_by_text */
+		getElementsByText: function(text, simple) {
+			return this.getElements('*').filter(function(el) {
+				if ( simple || el.children.length == 0 ) {
+					var tc = simple ? el.textContent.trim() : el.textContent;
+					return tc === text;
+				}
+
+				return false;
+			});
+		},
+		getElementByText: function(text, simple) {
+			return this.getElementsByText(text, simple)[0];
+		},
+		/* element_by_text> */
+
 		/* <element_class */
 		removeClass: function(token) {
 			this.classList.remove(token);
@@ -1118,8 +1135,12 @@
 	r.extend(D, {
 		getElement: Element.prototype.getElement,
 		/* <elements */
-		getElements: Element.prototype.getElements
+		getElements: Element.prototype.getElements,
 		/* elements> */
+		/* <element_by_text */
+		getElementsByText: Element.prototype.getElementsByText,
+		getElementByText: Element.prototype.getElementByText,
+		/* element_by_text> */
 	});
 
 	/* <windoc_scroll */

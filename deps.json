@@ -82,6 +82,7 @@
 	element_data: ['element_attr'],
 	element_html: [],
 	element_text: [],
+	element_by_text: ['elements'],
 	element_class: ['_classlist'],
 	element_inject: ['element_insertafter'],
 	element_append: [],
