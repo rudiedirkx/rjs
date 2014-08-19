@@ -1001,7 +1001,7 @@
 			return this.getElements('*').filter(function(el) {
 				if ( simple || el.children.length == 0 ) {
 					var tc = simple ? el.textContent.trim() : el.textContent;
-					return tc === text;
+					return text instanceof RegExp ? text.test(tc) : tc === text;
 				}
 
 				return false;
