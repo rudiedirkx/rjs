@@ -45,13 +45,13 @@ pre {
 	~ <span>?</span> KB gzipped
 </p>
 
-<pre id=code></pre>
+<pre id="code"></pre>
 
 <script src="rjs.js"></script>
 <script>
 "use strict";
 
-var deps, $code, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
+var deps, lastCommitId, $code, $button, $save, source, waiting = 2, depsMap = {disable: {}, enable: {}};
 var defState = '-anyevent_summary,-event_custom_directchange,-element_attr2method,-element_attr2method_html,-element_attr2method_text,-_element_contains,-_classlist,-ifsetor,-array_diff,-array_intersect';
 
 function setSize(length) {
@@ -83,8 +83,9 @@ function build(size, state) {
 	size && setSize(code.length);
 
 	if (state) {
-		var state = '// build.html#' + getBuildState().join(',');
-		code = state + "\n\n" + code + "\n";
+		var state = '// ' + location.origin + location.pathname + '#' + getBuildState().join(',');
+		var current = '// ' + lastCommitId;
+		code = state + "\n" + current + "\n\n" + code + "\n";
 	}
 
 	$code.setText(code);
@@ -170,6 +171,11 @@ function init() {
 	$button = $('button', 1);
 	$save = $('save');
 	$code = $('code');
+
+	window.gimme = function(commits) {
+		lastCommitId = commits.data[0].sha;
+	};
+	$.js('https://api.github.com/repos/rudiedirkx/rjs/commits?callback=gimme');
 
 	$.get('deps.json?_=' + Math.random()).on('success', function(e) {
 		deps = JSON.parse(this.responseText.validJSON());
