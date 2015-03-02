@@ -356,8 +356,8 @@
 
 	/* <coords2d */
 	function Coords2D(x, y) {
-		this.x = x;
-		this.y = y;
+		this.x = parseFloat(x);
+		this.y = parseFloat(y);
 	}
 	r.extend(Coords2D, {
 		/* <coords2d_add */
@@ -452,6 +452,7 @@
 		}
 		/* anyevent_pagexy> */
 
+		this.message = e.message;
 		this.data = e.dataTransfer || e.clipboardData;
 		this.time = e.timeStamp || e.timestamp || e.time || Date.now();
 
