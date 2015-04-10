@@ -118,7 +118,7 @@
 
 		r.each(Hosts, function(Host) {
 			if ( Super ) {
-				Host.prototype = Super;
+				Host.prototype = new Super.constructor;
 				Host.prototype.constructor = Host;
 			}
 
