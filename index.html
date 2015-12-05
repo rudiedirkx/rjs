@@ -137,11 +137,11 @@ function onDirectChange(e) {
 	console.log(e);
 	printSummary(this.value);
 }
-$('lastname').on('directchange', onDirectChange);
+$('#lastname').on('directchange', onDirectChange);
 
 // DOM select0ring
-var ul = $('ul'),
-	links = $$('ul a'),
+var ul = $('#ul'),
+	links = $$('#ul a'),
 	p = $('#-some-p'),
 	ps = $$('#-some-p');
 console.log('one P ', p);
@@ -152,9 +152,9 @@ links.each(function(a) {
 
 // Custom events: mouseenter & mouseleave
 $$('fieldset').on('mouseenter', function(e) {
-	$('fieldsetevents').checked && console.log('fieldset mouseenter', e);
+	$('#fieldsetevents').checked && console.log('fieldset mouseenter', e);
 }).on('mouseleave', function(e) {
-	$('fieldsetevents').checked && console.log('fieldset mouseleave', e);
+	$('#fieldsetevents').checked && console.log('fieldset mouseleave', e);
 });
 
 // Event delegation
@@ -197,7 +197,7 @@ $(function() {
 		}
 
 		document.el('button', {"href": '/does/exist.not', "text": 'Do me XHR/Ajax!'})
-			.injectBefore($$('form')[0])
+			.injectBefore($('form'))
 			.on('click', onAjaxButtonClick);
 	});
 });
@@ -220,36 +220,36 @@ doSomethingAsync().on('yes', function() {
 });
 
 // DOM options
-$('htmlmargin').on('change', function(e) {
+$('#htmlmargin').on('change', function(e) {
 	document.documentElement.css('margin-left', this.checked ? '100px' : '');
 });
-$('htmlrelative').on('change', function(e) {
+$('#htmlrelative').on('change', function(e) {
 	document.documentElement.css('position', this.checked ? 'relative' : '');
 });
-$('bodymargin').on('change', function(e) {
+$('#bodymargin').on('change', function(e) {
 	document.body.css('margin-left', this.checked ? '100px' : '');
 });
-$('bodyrelative').on('change', function(e) {
+$('#bodyrelative').on('change', function(e) {
 	document.body.css('position', this.checked ? 'relative' : '');
 });
 
 // Event coordinates
 document.on('click', function(e) {
-	$('annoying').css('position', '');
+	$('#annoying').css('position', '');
 });
-var $imgP = $('p.img', 1);
+var $imgP = $('p.img');
 document.getElement('img').on('click', function(e) {
 	e.stopPropagation();
 	console.log(e.originalEvent.pageX, e);
 	printSummary(e.summary());
 	var pageX = e.originalEvent.pageX,
 		pageY = e.originalEvent.pageY;
-	$('annoying').inject($imgP).css('position', 'absolute').css(e.pageXY.subtract($imgP.getPosition()).toCSS());
+	$('#annoying').inject($imgP).css('position', 'absolute').css(e.pageXY.subtract($imgP.getPosition()).toCSS());
 });
 
 // Create tooltips from [title] attributes
 $$('[title]').on('mouseenter', function(e) {
-	var tt = $('tooltip') || document.el('div', {id: 'tooltip'}).css({
+	var tt = $('#tooltip') || document.el('div', {id: 'tooltip'}).css({
 			position: 'absolute',
 			background: 'red',
 			color: 'white',
@@ -258,9 +258,9 @@ $$('[title]').on('mouseenter', function(e) {
 		text = this.data('title');
 	tt.show().setText(text);
 }).on('mouseleave', function(e) {
-	$('tooltip').hide();
+	$('#tooltip').hide();
 }).on('mousemove', function(e) {
-	$('tooltip').css(e.pageXY.add({x: 5, y: 20}).toCSS());
+	$('#tooltip').css(e.pageXY.add({x: 5, y: 20}).toCSS());
 }).data('title', function() {
 	return this.attr('title');
 }).attr('title', null);
@@ -279,7 +279,7 @@ setTimeout(function() {
 		background: 'black',
 		color: 'white',
 		padding: '10px'
-	}).injectBefore($('form', 1));
+	}).injectBefore($('form'));
 }, 500);
 
 </script>

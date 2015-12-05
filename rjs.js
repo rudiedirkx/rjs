@@ -8,8 +8,8 @@
 	var html = D.documentElement,
 		head = html.getElementsByTagName('head')[0];
 
-	var r = function r( id, sel ) {
-		return r.$(id, sel);
+	var r = function r(selector) {
+		return r.$(selector);
 	};
 
 	/* <json_alias */
@@ -1195,25 +1195,19 @@
 	}
 	/* domready> */
 
-	function $(id, selector) {
+	function $(selector) {
 		/* <domready */
-		if ( typeof id == 'function' ) {
+		if ( typeof selector == 'function' ) {
 			if ( D.readyState == 'interactive' || D.readyState == 'complete' ) {
-				setTimeout(id, 1);
+				setTimeout(selector, 1);
 				return D;
 			}
 
-			return D.on('ready', id);
+			return D.on('ready', selector);
 		}
 		/* domready> */
 
-		// By [id]
-		if ( !selector ) {
-			return D.getElementById(id);
-		}
-
-		// By selector
-		return D.getElement(id);
+		return D.getElement(selector);
 	}
 
 	/* <elements */

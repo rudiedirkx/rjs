@@ -100,7 +100,7 @@ function upDeps(cb) {
 	deps.forEach(function(name) {
 		if ( name[0] == '_' ) return;
 
-		var depCb = $('cb-' + name);
+		var depCb = $('#cb-' + name);
 		depCb.checked = cb.checked;
 		cbColor(depCb);
 		upDeps(depCb);
@@ -110,7 +110,7 @@ function upDeps(cb) {
 }
 
 function createTable(deps) {
-	var ul = $('ul', 1);
+	var ul = $('ul');
 	$.each(deps, function(x, name) {
 		document.el('li').setHTML('<label class="checked" title="Requires: \n- ' + depsMap.enable[name].join('\n- ') + '\n\nRequired by: \n- ' + depsMap.disable[name].join('\n- ') + '"><input type=checkbox id="cb-' + name + '" name="' + name + '" checked disabled> ' + name + '</label>').inject(ul);
 	});
@@ -133,7 +133,7 @@ function reinState() {
 	state = state.split(',');
 	state.forEach(function(name) {
 		var checked = '+' == name[0],
-			cb = $('input[name="' + name.substr(1) + '"]', 1);
+			cb = $('input[name="' + name.substr(1) + '"]');
 		if ( cb ) {
 			cb.checked = checked;
 			cbColor(cb);
@@ -168,9 +168,9 @@ function getBuildState() {
 }
 
 function init() {
-	$button = $('button', 1);
-	$save = $('save');
-	$code = $('code');
+	$button = $('button');
+	$save = $('#save');
+	$code = $('#code');
 
 	window.gimme = function(commits) {
 		lastCommitId = commits.data[0].sha;
