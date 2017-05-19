@@ -603,11 +603,13 @@
 
 			var baseType = eventType,
 				customEvent;
+			/* <event_custom */
 			if ( customEvent = Event.Custom[eventType] ) {
 				if ( customEvent.type ) {
 					baseType = customEvent.type;
 				}
 			}
+			/* event_custom> */
 
 			var onCallback = function(e, arg2) {
 				if ( e && !(e instanceof AnyEvent) ) {
@@ -1176,6 +1178,7 @@
 	/* windoc_scroll> */
 
 	/* <domready */
+	/* <event_custom */
 	Event.Custom.ready = {
 		before: function() {
 			if ( this == D ) {
@@ -1185,6 +1188,7 @@
 			}
 		}
 	};
+	/* event_custom> */
 
 	function attachDomReady() {
 		domReadyAttached = true;
@@ -1329,6 +1333,7 @@
 
 	XHR.busy = 0;
 
+	/* <event_custom */
 	Event.Custom.progress = {
 		before: function(options) {
 			if ( this instanceof XMLHttpRequest && this.upload ) {
@@ -1336,6 +1341,7 @@
 			}
 		}
 	};
+	/* event_custom> */
 
 	function shortXHR(method) {
 		return function(url, data, options) {
