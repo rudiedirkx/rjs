@@ -416,6 +416,7 @@
 		// this.which = e.which;
 		// this.keyCode = e.keyCode;
 		this.key = e.keyCode || e.which;
+		this.code = e.code;
 		this.alt = e.altKey;
 		this.ctrl = e.ctrlKey;
 		this.shift = e.shiftKey;
@@ -601,62 +602,66 @@
 				subject: this || W
 			};
 
-			var baseType = eventType,
-				customEvent;
-			/* <event_custom */
-			if ( customEvent = Event.Custom[eventType] ) {
-				if ( customEvent.type ) {
-					baseType = customEvent.type;
-				}
-			}
-			/* event_custom> */
+			var eventTypes = eventType instanceof Array ? eventType : [eventType];
 
-			var onCallback = function(e, arg2) {
-				if ( e && !(e instanceof AnyEvent) ) {
-					e = new AnyEvent(e);
+			r.each(eventTypes, function(eventType) {
+				var baseType = eventType;
+				var customEvent;
+				/* <event_custom */
+				if ( customEvent = Event.Custom[eventType] ) {
+					if ( customEvent.type ) {
+						baseType = customEvent.type;
+					}
 				}
+				/* event_custom> */
 
-				// Find event subject
-				var subject = options.subject;
-				if ( e && e.target && matches ) {
-					if ( !(subject = e.target.selfOrAncestor(matches)) ) {
-						return;
+				var onCallback = function(e, arg2) {
+					if ( e && !(e instanceof AnyEvent) ) {
+						e = new AnyEvent(e);
+					}
+
+					// Find event subject
+					var subject = options.subject;
+					if ( e && e.target && matches ) {
+						if ( !(subject = e.target.selfOrAncestor(matches)) ) {
+							return;
+						}
+					}
+
+					// Custom event type filter
+					if ( customEvent && customEvent.filter ) {
+						if ( !customEvent.filter.call(subject, e, arg2) ) {
+							return;
+						}
+					}
+
+					/* <anyevent_subject */
+					if ( !e.subject ) {
+						e.setSubject(subject);
+					}
+					/* anyevent_subject> */
+					return callback.call(subject, e, arg2);
+				};
+
+				if ( customEvent && customEvent.before ) {
+					if ( customEvent.before.call(this, options) === false ) {
+						return this;
 					}
 				}
 
-				// Custom event type filter
-				if ( customEvent && customEvent.filter ) {
-					if ( !customEvent.filter.call(subject, e, arg2) ) {
-						return;
-					}
-				}
+				var events = options.subject.$events || (options.subject.$events = {});
+				events[eventType] || (events[eventType] = []);
+				events[eventType].push({
+					type: baseType,
+					original: callback,
+					callback: onCallback,
+					bubbles: options.bubbles
+				});
 
-				/* <anyevent_subject */
-				if ( !e.subject ) {
-					e.setSubject(subject);
+				if ( options.subject.addEventListener ) {
+					options.subject.addEventListener(baseType, onCallback, options.bubbles);
 				}
-				/* anyevent_subject> */
-				return callback.call(subject, e, arg2);
-			};
-
-			if ( customEvent && customEvent.before ) {
-				if ( customEvent.before.call(this, options) === false ) {
-					return this;
-				}
-			}
-
-			var events = options.subject.$events || (options.subject.$events = {});
-			events[eventType] || (events[eventType] = []);
-			events[eventType].push({
-				type: baseType,
-				original: callback,
-				callback: onCallback,
-				bubbles: options.bubbles
 			});
-
-			if ( options.subject.addEventListener ) {
-				options.subject.addEventListener(baseType, onCallback, options.bubbles);
-			}
 
 			return this;
 		},
