@@ -32,7 +32,16 @@
 	/* ifsetor> */
 
 	r.arrayish = function(obj) {
-		return obj instanceof Array || ( typeof obj.length == 'number' && typeof obj != 'string' && ( obj[0] !== undefined || obj.length === 0 ) );
+		if ( obj == null ) {
+			return false;
+		}
+		if ( obj instanceof Array ) {
+			return true;
+		}
+		if ( typeof obj.length == 'number' && typeof obj != 'string' && ( obj[0] !== undefined || obj.length === 0 ) ) {
+			return true;
+		}
+		return false;
 	};
 
 	/* <array */
@@ -396,6 +405,9 @@
 		}
 		/* coords2d_equal> */
 	});
+	Coords2D.fromArray = function(arr) {
+		return new Coords2D(arr[0], arr[1]);
+	};
 	/* coords2d> */
 
 	/* <anyevent */
@@ -645,7 +657,7 @@
 
 				if ( customEvent && customEvent.before ) {
 					if ( customEvent.before.call(this, options) === false ) {
-						return this;
+						return;
 					}
 				}
 
@@ -661,7 +673,7 @@
 				if ( options.subject.addEventListener ) {
 					options.subject.addEventListener(baseType, onCallback, options.bubbles);
 				}
-			});
+			}, this);
 
 			return this;
 		},
