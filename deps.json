@@ -30,18 +30,13 @@
 	elements_invoke: ['elements'],
 
 	coords2d: [],
-	coords2d_add: ['coords2d'],
-	coords2d_subtract: ['coords2d'],
-	coords2d_tocss: ['coords2d'],
-	coords2d_join: ['coords2d'],
-	coords2d_equal: ['coords2d', 'coords2d_join'],
 
 	anyevent: [],
 	anyevent_lmrclick: ['anyevent'],
 	anyevent_touches: ['anyevent', 'array'],
-	anyevent_pagexy: ['anyevent', 'coords2d', 'coords2d_add'],
+	anyevent_pagexy: ['anyevent', 'coords2d'],
 	anyevent_summary: ['is_a', 'anyevent', 'coords2d', 'class'],
-	anyevent_subject: ['anyevent', 'anyevent_pagexy', 'coords2d_subtract', 'element_position'],
+	anyevent_subject: ['anyevent', 'anyevent_pagexy', 'element_position'],
 
 	event_keys: [],
 	event_custom: ['eventable'],
@@ -90,7 +85,7 @@
 	element_css: ['element_style'],
 	element_show: ['element_css'],
 	element_empty: [],
-	element_position: ['coords2d', 'coords2d_add', 'windoc_scroll'],
+	element_position: ['coords2d', 'windoc_scroll'],
 	element_scroll: ['coords2d'],
 
 	windoc_scroll: ['coords2d'],

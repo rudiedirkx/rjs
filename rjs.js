@@ -369,41 +369,30 @@
 		this.y = parseFloat(y);
 	}
 	r.extend(Coords2D, {
-		/* <coords2d_add */
 		add: function(coords) {
 			return new Coords2D(this.x + coords.x, this.y + coords.y);
 		},
-		/* coords2d_add> */
-
-		/* <coords2d_subtract */
 		subtract: function(coords) {
 			return new Coords2D(this.x - coords.x, this.y - coords.y);
 		},
-		/* coords2d_subtract> */
-
-		/* <coords2d_tocss */
 		toCSS: function() {
 			return {
 				left: this.x + 'px',
 				top: this.y + 'px'
 			};
 		},
-		/* coords2d_tocss> */
-
-		/* <coords2d_join */
 		join: function(glue) {
 			if ( glue == null ) {
 				glue = ',';
 			}
 			return [this.x, this.y].join(glue);
 		},
-		/* coords2d_join> */
-
-		/* <coords2d_equal */
 		equal: function(coord) {
 			return this.join() == coord.join();
-		}
-		/* coords2d_equal> */
+		},
+		toArray: function() {
+			return [this.x, this.y];
+		},
 	});
 	Coords2D.fromArray = function(arr) {
 		return new Coords2D(arr[0], arr[1]);
