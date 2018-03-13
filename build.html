@@ -74,7 +74,7 @@ function build(size, state) {
 
 	code = code
 		.replace(/\/\*[\s\S]+?\*\//g, '') // block comments
-		.replace(/\/\/ .+/g, '') // line comments
+		.replace(/ *\/\/ .+/g, '') // line comments
 		.replace(/r\.extend\(\w+, {[\s\r\n]+}\);/g, '') // empty extends
 		.replace(/,([\r\n\s]+?)}/g, '$1}') // trailing commas
 		.replace(/\t+[\r\n]+/g, '') // empty lines
@@ -177,9 +177,7 @@ function init() {
 	};
 	$.js('https://api.github.com/repos/rudiedirkx/rjs/commits?callback=gimme');
 
-	$.get('deps.json?_=' + Math.random()).on('success', function(e) {
-		deps = JSON.parse(this.responseText.validJSON());
-
+	$.get('deps.json?_=' + Math.random()).on('success', function(e, deps) {
 		createDepsMap(deps);
 
 		createTable(deps);
@@ -207,12 +205,6 @@ function init() {
 		this.href = '#' + state.join(',');
 	});
 }
-
-$.extend(String, {
-	validJSON: function() {
-		return this.replace(/(\w+):/g, '"$1":').replace(/'/g, '"');
-	}
-});
 </script>
 
 </body>
