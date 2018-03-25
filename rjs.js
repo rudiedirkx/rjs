@@ -354,6 +354,10 @@
 		},
 		/* elements_invoke> */
 
+		concat: function(items) {
+			return new Elements(this.slice().concat(items));
+		},
+
 		filter: function(filter) {
 			if ( typeof filter == 'function' ) {
 				return new Elements([].filter.call(this, filter));
@@ -392,6 +396,28 @@
 		},
 		toArray: function() {
 			return [this.x, this.y];
+		},
+		copy: function() {
+			return new Coords2D(this.x, this.y);
+		},
+		rotate: function(angle) {
+			var x = Math.cos(angle) * this.x - Math.sin(angle) * this.y;
+			var y = Math.sin(angle) * this.x + Math.cos(angle) * this.y;
+			return new Coords2D(x, y);
+		},
+		round: function(decimals) {
+			if ( !decimals ) {
+				return new Coords2D(Math.round(this.x), Math.round(this.y));
+			}
+
+			var scale = Math.pow(10, decimals);
+			return new Coords2D(
+				Math.round(this.x * scale)/scale,
+				Math.round(this.y * scale)/scale
+			);
+		},
+		distance: function(target) {
+			return Math.sqrt(Math.pow(Math.abs(this.x - target.x), 2) + Math.pow(Math.abs(this.y - target.y), 2));
 		},
 	});
 	Coords2D.fromArray = function(arr) {
