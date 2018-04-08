@@ -1261,7 +1261,10 @@
 			data: null,
 			url: url,
 			requester: 'XMLHttpRequest',
-			execScripts: true
+			execScripts: true,
+			/* <xhr_global */
+			globalStart: true,
+			/* xhr_global> */
 		};
 		options = options ? r.merge({}, defaults, options) : defaults;
 		options.method = options.method.toUpperCase();
@@ -1347,7 +1350,7 @@
 			XHR.busy++;
 
 			/* <xhr_global */
-			xhr.globalFire('xhr', 'start');
+			options.globalStart && xhr.globalFire('xhr', 'start');
 			/* xhr_global> */
 			xhr.fire('start');
 
