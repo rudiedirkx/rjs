@@ -443,6 +443,7 @@
 		// this.which = e.which;
 		// this.keyCode = e.keyCode;
 		this.key = e.keyCode || e.which;
+		this.keyName = e.key;
 		this.code = e.code;
 		this.alt = e.altKey;
 		this.ctrl = e.ctrlKey;
@@ -456,6 +457,10 @@
 		/* anyevent_lmrclick> */
 		this.which = this.key || this.button;
 		this.detail = e.detail;
+
+		this.deltaX = e.deltaX;
+		this.deltaY = e.deltaY;
+		this.deltaZ = e.deltaZ;
 
 		this.pageX = e.pageX;
 		this.pageY = e.pageY;
