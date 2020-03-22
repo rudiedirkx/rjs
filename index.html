@@ -53,7 +53,7 @@ pre {
 
 <p id="-some-p">Just a shibling.</p>
 
-<p class="img"><img src="http://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="150" /></p>
+<p class="img"><img src="https://25.media.tumblr.com/tumblr_m5cvm4LNEi1rt4ksio1_500.gif" width="150" /></p>
 
 <form method="post" action>
 	<input type="hidden" value="hid it" />
@@ -232,6 +232,15 @@ $('#bodymargin').on('change', function(e) {
 $('#bodyrelative').on('change', function(e) {
 	document.body.css('position', this.checked ? 'relative' : '');
 });
+
+// Array properties
+var arr = ['a', 'b'];
+console.group('ARRAY PROPERTIES');
+console.log('invoke' in arr);
+for (var key in arr) {
+	console.log(key);
+}
+console.groupEnd('ARRAY PROPERTIES');
 
 // Event coordinates
 document.on('click', function(e) {

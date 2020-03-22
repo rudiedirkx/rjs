@@ -133,13 +133,13 @@
 
 			var methodOwner = Host.prototype ? Host.prototype : Host;
 			r.each(proto, function(fn, name) {
-				methodOwner[name] = fn;
+				Object.defineProperty(methodOwner, name, {value: fn});
 
 				/* <elements_invoke */
-				if ( Host == Element && !Elements.prototype[name] ) {
-					Elements.prototype[name] = function() {
+				if ( Host === Element && !Elements.prototype[name] ) {
+					Object.defineProperty(Elements.prototype, name, {value: function() {
 						return this.invoke(name, arguments);
-					};
+					}});
 				}
 				/* elements_invoke> */
 			});
@@ -612,11 +612,12 @@
 	/* native_extend> */
 
 	/* <eventable */
+	var eventablePrototype;
 	function Eventable(subject) {
 		this.subject = subject;
 		this.time = Date.now();
 	}
-	r.extend(Eventable, {
+	r.extend(Eventable, eventablePrototype = {
 		/* <eventable_on */
 		on: function(eventType, matches, callback) {
 			if ( !callback ) {
@@ -749,10 +750,11 @@
 	/* eventable> */
 
 	/* <native_eventable */
-	r.extend([W, D, Element, XMLHttpRequest], Eventable.prototype);
+	var hosts = [W, D, Element, XMLHttpRequest];
 	if ( W.XMLHttpRequestUpload ) {
-		r.extend([W.XMLHttpRequestUpload], Eventable.prototype);
+		hosts.push(W.XMLHttpRequestUpload);
 	}
+	r.extend(hosts, eventablePrototype);
 	/* native_eventable> */
 
 	r.extend(Node, {
