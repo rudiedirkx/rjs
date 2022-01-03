@@ -5,8 +5,8 @@
 
 	// try {
 
-	var html = D.documentElement,
-		head = html.getElementsByTagName('head')[0];
+	var html = D && D.documentElement,
+		head = html && html.getElementsByTagName('head')[0];
 
 	var r = function r(selector) {
 		return r.$(selector);
@@ -126,6 +126,8 @@
 		}
 
 		r.each(Hosts, function(Host) {
+			if ( !Host ) return;
+
 			if ( Super ) {
 				Host.prototype = new Super.constructor;
 				Host.prototype.constructor = Host;
@@ -136,7 +138,7 @@
 				Object.defineProperty(methodOwner, name, {value: fn});
 
 				/* <elements_invoke */
-				if ( Host === Element && !Elements.prototype[name] ) {
+				if ( Host === W.Element && !Elements.prototype[name] ) {
 					Object.defineProperty(Elements.prototype, name, {value: function() {
 						return this.invoke(name, arguments);
 					}});
@@ -592,10 +594,10 @@
 	};
 
 	/* <_event_custom_mousenterleave */
-	if ( 'onmouseenter' in html ) {
+	if ( html && 'onmouseenter' in html ) {
 		delete Event.Custom.mouseenter;
 	}
-	if ( 'onmouseleave' in html ) {
+	if ( html && 'onmouseleave' in html ) {
 		delete Event.Custom.mouseleave;
 	}
 	/* _event_custom_mousenterleave> */
@@ -605,12 +607,12 @@
 	r.each([
 		W,
 		D,
-		Element,
+		W.Element,
 		/* <elements */
 		Elements
 		/* elements> */
 	], function(Host) {
-		Host.extend = function(methods) {
+		if (Host) Host.extend = function(methods) {
 			r.extend([this], methods);
 		};
 	});
@@ -755,14 +757,14 @@
 	/* eventable> */
 
 	/* <native_eventable */
-	var hosts = [W, D, Element, XMLHttpRequest];
+	var hosts = [W, D, W.Element, XMLHttpRequest];
 	if ( W.XMLHttpRequestUpload ) {
 		hosts.push(W.XMLHttpRequestUpload);
 	}
 	r.extend(hosts, eventablePrototype);
 	/* native_eventable> */
 
-	r.extend(Node, {
+	W.Node && r.extend(Node, {
 		/* <element_ancestor */
 		ancestor: function(selector) {
 			var el = this;
@@ -860,8 +862,8 @@
 	};
 	/* element_attr2method> */
 
-	var EP = Element.prototype;
-	r.extend(Element, {
+	var EP = W.Element && Element.prototype;
+	W.Element && r.extend(Element, {
 		/* <element_prop */
 		prop: function(name, value) {
 			if ( value !== undefined ) {
@@ -1194,7 +1196,7 @@
 		/* element_scroll> */
 	});
 
-	r.extend(D, {
+	W.Element && r.extend(D, {
 		getElement: Element.prototype.getElement,
 		/* <elements */
 		getElements: Element.prototype.getElements,
