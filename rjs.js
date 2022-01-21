@@ -1130,13 +1130,13 @@
 
 				// Set multiple properties
 				r.each(property, function(value, name) {
-					this.style[name] = value;
+					this.style.setProperty(name, value);
 				}, this);
 				return this;
 			}
 
 			// Set single property
-			this.style[property] = value;
+			this.style.setProperty(property, value);
 			return this;
 		},
 		/* element_css> */
