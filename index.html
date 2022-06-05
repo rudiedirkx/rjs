@@ -94,6 +94,11 @@ pre {
 	<p><input type="submit" name="submit" value="Submit that shit" /></p>
 </form>
 
+<hr>
+
+<p id="disabled-button-container">
+	<button disabled><span>Disabled button</span></button>
+</p>
 
 
 <script>
@@ -280,6 +285,10 @@ console.log('loadJS', $.js(['https://platform.twitter.com/widgets.js', 'https://
 }).on('error', function(e) {
 	console.log('error <SCRIPT>', this, e);
 }));
+
+$('#disabled-button-container').on(['click', 'contextmenu'], 'button', function(e) {
+	console.log(e);
+});
 
 // Timeout to ensure visually all script ran
 setTimeout(function() {

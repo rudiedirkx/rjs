@@ -624,6 +624,7 @@
 		this.subject = subject;
 		this.time = Date.now();
 	}
+	Eventable.CHECK_MATCHES_DISABLED_TYPES = ['click'];
 	r.extend(Eventable, eventablePrototype = {
 		/* <eventable_on */
 		on: function(eventType, matches, callback) {
@@ -659,6 +660,9 @@
 					var subject = options.subject;
 					if ( e && e.target && matches ) {
 						if ( !(subject = e.target.selfOrAncestor(matches)) ) {
+							return;
+						}
+						if ( Eventable.CHECK_MATCHES_DISABLED_TYPES.contains(e.type) && subject.disabled === true ) {
 							return;
 						}
 					}
